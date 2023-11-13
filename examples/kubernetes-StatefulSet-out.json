@@ -1,0 +1,41 @@
+{
+    "container": {
+        "id": "c2a7bdcc846d963411bf718c8edbf3eee2c604f81814f90d051cc6d0efe86b0b",
+        "name": "opensearch",
+        "image": {
+            "name": "docker.io/opensearchproject/opensearch:2.11.0",
+            "hash": {
+                "all": [
+                    "sha256:5a0167874ff2a2c224ff42cded37f31aeac96df3aa306a2db603a444d096c078"
+                ]
+            }
+        }
+    },
+    "host": {
+        "hostname": "jupiter"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "namespace": "logging",
+        "resource": {
+            "id": "3081ce31-c195-481e-ac23-5703ba323c67",
+            "name": "opensearch-0",
+            "type": "Pod",
+            "label": [
+                "app.kubernetes.io/component:opensearch",
+                "app.kubernetes.io/instance:bieniek-it-logging",
+                "app.kubernetes.io/managed-by:Helm",
+                "app.kubernetes.io/name:opensearch",
+                "app.kubernetes.io/version:2.11.0",
+                "apps.kubernetes.io/pod-index:0",
+                "controller-revision-hash:opensearch-8d694b56d",
+                "helm.sh/chart:opensearch-2.16.1",
+                "statefulset.kubernetes.io/pod-name:opensearch-0"
+            ],
+            "parent": {
+                "type": "StatefulSet"
+            }
+        }
+    },
+    "unrelated-field": "should not be touched"
+}
