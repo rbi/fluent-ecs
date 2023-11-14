@@ -16,7 +16,9 @@ pub extern "C" fn fluent_ecs_filter(
     let slice_record: &[u8] =
         unsafe { slice::from_raw_parts(record as *const u8, record_len as usize) };
 
-    fluent_ecs_filter_rust(slice_record).as_ptr()
+    let mut res = fluent_ecs_filter_rust(slice_record).as_bytes().to_vec();
+    res.push(0);
+    res.as_ptr()
 }
 
 pub fn fluent_ecs_filter_rust(record: &[u8]) -> String {
