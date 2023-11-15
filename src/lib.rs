@@ -45,16 +45,10 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case(
-        "examples/kubernetes-StatefulSet-in.json",
-        "examples/kubernetes-StatefulSet-out.json"
-    )]
-    #[case(
-        "examples/kubernetes-Deployment-in.json",
-        "examples/kubernetes-Deployment-out.json"
-    )]
-    fn conversion_test(#[case] input: &str, #[case] output: &str) -> Result<(), String> {
-        let input = fs::read(input)
+    #[case("kubernetes-StatefulSet")]
+    #[case("kubernetes-Deployment")]
+    fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
+        let input = fs::read(format!("examples/{}-in.json", test_case))
             .map_err(|err| format!("Input file could not be read: {}", err.to_string()))?;
 
         let actual_string = fluent_ecs_filter_rust(&input);
@@ -66,6 +60,7 @@ mod tests {
             )
         })?;
 
+        let output = format!("examples/{}-out.json", test_case);
         println!("Output compared against '{}':\n{}\n", output, actual_string);
 
         let expected_file =
