@@ -1,0 +1,18 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "metallb"
+        }
+    },
+    "caller": "main.go:374",
+    "event": "serviceAnnounced",
+    "ips": [
+        "10.36.33.15",
+        "fdb1:5dc6:8321:20:c0be:c0be:a24:210f"
+    ],
+    "level": "info",
+    "msg": "service has IP, announcing",
+    "pool": "home",
+    "protocol": "layer2",
+    "ts": "2023-11-04T22:09:39Z"
+}

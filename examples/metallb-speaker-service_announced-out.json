@@ -1,0 +1,42 @@
+{
+    "@timestamp": "2023-11-04T22:09:39Z",
+    "message": "service has IP, announcing",
+    "event": {
+        "module": "metallb",
+        "kind": "event",
+        "category": [
+            "network"
+        ],
+        "type": [
+            "start"
+        ],
+        "outcome": "success",
+        "action": "serviceAnnounced",
+        "severity": 200
+    },
+    "log": {
+        "level": "info",
+        "origin": {
+            "file": {
+                "name": "main.go",
+                "line": 374
+            }
+        }
+    },
+    "network": {
+        "protocol": "layer2"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:metallb"
+            ]
+        }
+    },
+    "misc": [
+        "ips:10.36.33.15,fdb1:5dc6:8321:20:c0be:c0be:a24:210f",
+        "pool:home"
+    ]
+}

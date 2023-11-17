@@ -11,3 +11,16 @@ Add the target for web assembly.
 Build with cargo.
 
     cargo build --target wasm32-unknown-unknown --release
+
+# event.severity
+
+Fluent ECS tries to provide normalized values for the field `field.severity` across different applications.
+The following values are used.
+
+| level | severity |
++-------+----------|
+| trace |  50      |
+| debug | 100      |
+| info  | 200      |
+| warn  | 300      |
+| error | 400      |

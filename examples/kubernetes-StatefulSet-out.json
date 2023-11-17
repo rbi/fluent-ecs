@@ -1,4 +1,7 @@
 {
+    "event": {
+        "kind": "event"
+    },
     "container": {
         "id": "c2a7bdcc846d963411bf718c8edbf3eee2c604f81814f90d051cc6d0efe86b0b",
         "name": "opensearch",
@@ -21,6 +24,10 @@
             "id": "3081ce31-c195-481e-ac23-5703ba323c67",
             "name": "opensearch-0",
             "type": "Pod",
+            "annotations": [
+                "configchecksum:17001c1fedf81a2eb8bf7937a351e097318a60469b8505fec69690ebdec88b1",
+                "securityconfigchecksum:151a6e127dc789b6b1972d8323530fea41ddcf68bb7e7e8cdbe35624d961796"
+            ],
             "label": [
                 "app.kubernetes.io/component:opensearch",
                 "app.kubernetes.io/instance:bieniek-it-logging",

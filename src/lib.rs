@@ -1,7 +1,10 @@
 use std::os::raw::c_char;
 use std::slice;
 
+use serde_json::Value;
+
 mod kubernetes;
+mod metallb;
 mod model;
 
 #[no_mangle]
@@ -21,18 +24,41 @@ pub extern "C" fn fluent_ecs_filter(
     res.as_ptr()
 }
 
+// https://www.elastic.co/guide/en/ecs/current/ecs-ecs.html
+// ecs.version: 8.11
+
 pub fn fluent_ecs_filter_rust(record: &[u8]) -> String {
     let mut json: model::FluentBitJson = serde_json::from_slice(record).unwrap();
 
+    let parser = json
+        .kubernetes
+        .as_ref()
+        .and_then(|k| k.annotations.get("fluent-ecs.bieniek-it.de/parser"))
+        .and_then(|val| match val {
+            Value::String(string_val) => Some(string_val),
+            _ => None,
+        });
+
+    if let Some(parser) = parser {
+        match parser.as_str() {
+            "metallb" => metallb::convert_metallb_logs(&mut json),
+            _ => {}
+        }
+    }
+
     kubernetes::convert_kubernetes_metadata(&mut json);
 
-    // https://www.elastic.co/guide/en/ecs/current/ecs-ecs.html
-    // ecs.version: 8.11
+    set_basic_data(&mut json);
 
     match serde_json::to_string(&json) {
         Ok(res) => res,
         Err(err) => format!("{{\"fluent-ecs-error\": \"{}\"}}", err),
     }
+}
+
+fn set_basic_data(json: &mut model::FluentBitJson) {
+    let event = json.event(); // ensures that event is an object instead of a String.
+    event.kind.get_or_insert("event".to_string());
 }
 
 #[cfg(test)]
@@ -47,6 +73,7 @@ mod tests {
     #[rstest]
     #[case("kubernetes-StatefulSet")]
     #[case("kubernetes-Deployment")]
+    #[case("metallb-speaker-service_announced")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         let input = fs::read(format!("examples/{}-in.json", test_case))
             .map_err(|err| format!("Input file could not be read: {}", err.to_string()))?;

@@ -14,6 +14,10 @@
             "helm.sh/chart": "opensearch-2.16.1",
             "statefulset.kubernetes.io/pod-name": "opensearch-0"
         },
+        "annotations": {
+            "configchecksum": "17001c1fedf81a2eb8bf7937a351e097318a60469b8505fec69690ebdec88b1",
+            "securityconfigchecksum": "151a6e127dc789b6b1972d8323530fea41ddcf68bb7e7e8cdbe35624d961796"
+        },
         "host": "jupiter",
         "container_name": "opensearch",
         "docker_id": "c2a7bdcc846d963411bf718c8edbf3eee2c604f81814f90d051cc6d0efe86b0b",
