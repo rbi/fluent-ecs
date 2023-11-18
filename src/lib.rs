@@ -1,6 +1,7 @@
 use std::os::raw::c_char;
 use std::slice;
 
+use chrono::{DateTime, Duration, FixedOffset};
 use serde_json::Value;
 
 mod kubernetes;
@@ -11,15 +12,20 @@ mod model;
 pub extern "C" fn fluent_ecs_filter(
     _tag: *const c_char,
     _tag_len: u32,
-    _time_sec: u32,
-    _time_nsec: u32,
+    time_sec: u32,
+    time_nsec: u32,
     record: *const c_char,
     record_len: u32,
 ) -> *const u8 {
     let slice_record: &[u8] =
         unsafe { slice::from_raw_parts(record as *const u8, record_len as usize) };
 
-    let mut res = fluent_ecs_filter_rust(slice_record).as_bytes().to_vec();
+    let time = DateTime::from_timestamp(time_sec.into(), time_nsec)
+        .expect("Time passed from fluent-bit could not be parsed.")
+        .fixed_offset();
+    let mut res = fluent_ecs_filter_rust(slice_record, time)
+        .as_bytes()
+        .to_vec();
     res.push(0);
     res.as_ptr()
 }
@@ -27,7 +33,7 @@ pub extern "C" fn fluent_ecs_filter(
 // https://www.elastic.co/guide/en/ecs/current/ecs-ecs.html
 // ecs.version: 8.11
 
-pub fn fluent_ecs_filter_rust(record: &[u8]) -> String {
+pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> String {
     let mut json: model::FluentBitJson = serde_json::from_slice(record).unwrap();
 
     let parser = json
@@ -48,7 +54,7 @@ pub fn fluent_ecs_filter_rust(record: &[u8]) -> String {
 
     kubernetes::convert_kubernetes_metadata(&mut json);
 
-    set_basic_data(&mut json);
+    set_basic_data(&mut json, time);
 
     match serde_json::to_string(&json) {
         Ok(res) => res,
@@ -56,9 +62,19 @@ pub fn fluent_ecs_filter_rust(record: &[u8]) -> String {
     }
 }
 
-fn set_basic_data(json: &mut model::FluentBitJson) {
-    let event = json.event(); // ensures that event is an object instead of a String.
-    event.kind.get_or_insert("event".to_string());
+fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) {
+    let event = json.event();
+
+    if let None = event.kind {
+        event.kind.get_or_insert("event".to_string());
+    }
+    if let Some(ts) = json.timestamp {
+        if ts - time != Duration::zero() {
+            json.event().created = Some(time);
+        }
+    } else {
+        json.timestamp = Some(time);
+    }
 }
 
 #[cfg(test)]
@@ -78,10 +94,12 @@ mod tests {
     #[case("metallb-controller-PoolReconciler")]
     #[case("metallb-controller-cert_rotation")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
+        let some_time = DateTime::parse_from_rfc3339("2023-11-16T13:27:38.555+01:00")
+            .map_err(|err| err.to_string())?;
         let input = fs::read(format!("examples/{}-in.json", test_case))
             .map_err(|err| format!("Input file could not be read: {}", err.to_string()))?;
 
-        let actual_string = fluent_ecs_filter_rust(&input);
+        let actual_string = fluent_ecs_filter_rust(&input, some_time);
         let actual: Value = serde_json::from_str(&actual_string).map_err(|err| {
             format!(
                 "Module under test did not return valid JSON error:\n{}\n\n value:\n{}",

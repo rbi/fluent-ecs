@@ -1,4 +1,5 @@
 pub mod ecs {
+    use chrono::{DateTime, FixedOffset};
     use serde_derive::{Deserialize, Serialize};
     use serde_json::Value;
 
@@ -93,7 +94,9 @@ pub mod ecs {
 
         #[serde(skip_serializing_if = "Option::is_none")]
         pub action: Option<String>,
-
+        
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub created: Option<DateTime<FixedOffset>>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub severity: Option<u32>,
 
@@ -111,6 +114,7 @@ pub mod ecs {
                 type_val: Vec::new(),
                 outcome: None,
                 action: None,
+                created: None,
                 severity: None,
                 other: Value::Null,
             }
