@@ -6,8 +6,10 @@ use model::LogOrString;
 use serde_json::Value;
 
 mod kubernetes;
-mod metallb;
 mod model;
+// app log parsers
+mod etcd;
+mod metallb;
 
 #[no_mangle]
 pub extern "C" fn fluent_ecs_filter(
@@ -37,18 +39,18 @@ pub extern "C" fn fluent_ecs_filter(
 pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> String {
     let mut json: model::FluentBitJson = serde_json::from_slice(record).unwrap();
 
-    let parser = json
-        .kubernetes
-        .as_ref()
-        .and_then(|k| k.annotations.get("fluent-ecs.bieniek-it.de/parser"))
-        .and_then(|val| match val {
-            Value::String(string_val) => Some(string_val),
-            _ => None,
-        });
+    let kube = json.kubernetes.as_ref();
 
-    if let Some(parser) = parser {
+    if let Some(Value::String(parser)) =
+        kube.and_then(|k| k.annotations.get("fluent-ecs.bieniek-it.de/parser"))
+    {
         match parser.as_str() {
             "metallb" => metallb::convert_metallb_logs(&mut json),
+            _ => {}
+        }
+    } else if let Some(Value::String(component)) = kube.and_then(|k| k.labels.get("component")) {
+        match component.as_str() {
+            "etcd" => etcd::convert_etcd_logs(&mut json),
             _ => {}
         }
     }
@@ -106,6 +108,8 @@ mod tests {
     #[case::metallb_speaker_partial_join("metallb_speaker_partial_join")]
     #[case::metallb_controller_poolreconciler("metallb_controller_poolreconciler")]
     #[case::metallb_controller_cert_rotation("metallb_controller_cert_rotation")]
+    #[case::etcd_took("etcd_took")]
+    #[case::etcd_warn("etcd_warn")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         let some_time = DateTime::parse_from_rfc3339("2023-11-16T13:27:38.555+01:00")
             .map_err(|err| err.to_string())?;

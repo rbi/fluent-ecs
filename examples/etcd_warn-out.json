@@ -1,0 +1,42 @@
+{
+    "@timestamp": "2023-11-06T01:00:46.183115Z",
+    "message": "apply request took too long",
+    "event": {
+        "module": "etcd",
+        "kind": "event",
+        "category": [
+            "database"
+        ],
+        "severity": 300,
+        "duration": 103230757,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service": {
+        "type": "etcd"
+    },
+    "log": {
+        "level": "warn",
+        "origin": {
+            "file": {
+                "name": "etcdserver/util.go",
+                "line": 170
+            }
+        }
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "component:etcd",
+                "tier:control-plane"
+            ]
+        }
+    },
+    "misc": [
+        "expected-duration:100ms",
+        "prefix:read-only range ",
+        "request:key:\"/registry/health\" ",
+        "response:range_response_count:0 size:6"
+    ]
+}

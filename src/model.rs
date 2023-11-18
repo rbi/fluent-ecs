@@ -99,6 +99,8 @@ pub mod ecs {
         pub created: Option<DateTime<FixedOffset>>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub severity: Option<u32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub duration: Option<u64>,
 
         #[serde(flatten)]
         pub other: Value,
@@ -116,6 +118,7 @@ pub mod ecs {
                 action: None,
                 created: None,
                 severity: None,
+                duration: None,
                 other: Value::Null,
             }
         }

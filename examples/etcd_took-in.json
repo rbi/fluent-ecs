@@ -1,0 +1,15 @@
+{
+    "kubernetes": {
+        "labels": {
+            "component": "etcd",
+            "tier": "control-plane"
+        }
+    },
+    "level": "info",
+    "ts": "2023-11-05T03:00:42.546457Z",
+    "caller": "mvcc/kvstore_compaction.go:66",
+    "msg": "finished scheduled compaction",
+    "compact-revision": 1738028,
+    "took": "17.294439ms",
+    "hash": 297741881
+}

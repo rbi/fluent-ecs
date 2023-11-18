@@ -1,0 +1,17 @@
+{
+    "kubernetes": {
+        "labels": {
+            "component": "etcd",
+            "tier": "control-plane"
+        }
+    },
+    "level": "warn",
+    "ts": "2023-11-06T01:00:46.183115Z",
+    "caller": "etcdserver/util.go:170",
+    "msg": "apply request took too long",
+    "took": "103.230757ms",
+    "expected-duration": "100ms",
+    "prefix": "read-only range ",
+    "request": "key:\"/registry/health\" ",
+    "response": "range_response_count:0 size:6"
+}

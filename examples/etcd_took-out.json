@@ -1,0 +1,40 @@
+{
+    "@timestamp": "2023-11-05T03:00:42.546457Z",
+    "message": "finished scheduled compaction",
+    "event": {
+        "module": "etcd",
+        "kind": "event",
+        "category": [
+            "database"
+        ],
+        "severity": 200,
+        "duration": 17294439,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service": {
+        "type": "etcd"
+    },
+    "log": {
+        "level": "info",
+        "origin": {
+            "file": {
+                "name": "mvcc/kvstore_compaction.go",
+                "line": 66
+            }
+        }
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "component:etcd",
+                "tier:control-plane"
+            ]
+        }
+    },
+    "misc": [
+        "hash:297741881",
+        "compact-revision:1738028"
+    ]
+}
