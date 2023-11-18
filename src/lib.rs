@@ -99,13 +99,13 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case("generic-tail-input")]
-    #[case("kubernetes-StatefulSet")]
-    #[case("kubernetes-Deployment")]
-    #[case("metallb-speaker-service_announced")]
-    #[case("metallb-speaker-partial_join")]
-    #[case("metallb-controller-PoolReconciler")]
-    #[case("metallb-controller-cert_rotation")]
+    #[case::generic_tail_input("generic_tail_input")]
+    #[case::kubernetes_statefulset("kubernetes_statefulset")]
+    #[case::kubernetes_deployment("kubernetes_deployment")]
+    #[case::metallb_speaker_service_announced("metallb_speaker_service_announced")]
+    #[case::metallb_speaker_partial_join("metallb_speaker_partial_join")]
+    #[case::metallb_controller_poolreconciler("metallb_controller_poolreconciler")]
+    #[case::metallb_controller_cert_rotation("metallb_controller_cert_rotation")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         let some_time = DateTime::parse_from_rfc3339("2023-11-16T13:27:38.555+01:00")
             .map_err(|err| err.to_string())?;
