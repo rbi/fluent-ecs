@@ -1,0 +1,12 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "metallb"
+        }
+    },
+    "caller": "pool_controller.go:107",
+    "controller": "PoolReconciler",
+    "event": "force service reload",
+    "level": "info",
+    "ts": "2023-11-05T18:07:57Z"
+}

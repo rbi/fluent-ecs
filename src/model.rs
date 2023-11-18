@@ -118,6 +118,24 @@ pub mod ecs {
     }
 
     #[derive(Serialize, Deserialize)]
+    pub struct Error {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub message: Option<String>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl Error {
+        pub fn new() -> Self {
+            Error {
+                message: None,
+                other: Value::Null,
+            }
+        }
+    }
+
+    #[derive(Serialize, Deserialize)]
     pub struct Host {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub hostname: Option<String>,
@@ -140,6 +158,8 @@ pub mod ecs {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub level: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
+        pub logger: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub origin: Option<LogOrigin>,
 
         #[serde(flatten)]
@@ -150,6 +170,7 @@ pub mod ecs {
         pub fn new() -> Self {
             Log {
                 level: None,
+                logger: None,
                 origin: None,
                 other: Value::Null,
             }
@@ -362,6 +383,8 @@ pub struct FluentBitJson {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub event: Option<EventOrString>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<ErrorOrString>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub container: Option<ecs::Container>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub host: Option<ecs::Host>,
@@ -384,6 +407,13 @@ pub struct FluentBitJson {
 #[serde(untagged)]
 pub enum EventOrString {
     Event(ecs::Event),
+    String(String),
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ErrorOrString {
+    Error(ecs::Error),
     String(String),
 }
 
@@ -416,6 +446,21 @@ impl FluentBitJson {
 
         match &mut self.event {
             Some(EventOrString::Event(event)) => event,
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn error(&mut self) -> &mut ecs::Error {
+        match &self.error {
+            Some(ErrorOrString::Error(_)) => (),
+            _ => {
+                self.error = Some(ErrorOrString::Error(ecs::Error::new()));
+                ()
+            }
+        };
+
+        match &mut self.error {
+            Some(ErrorOrString::Error(error)) => error,
             _ => unreachable!(),
         }
     }

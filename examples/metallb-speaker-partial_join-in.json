@@ -1,0 +1,15 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "metallb"
+        }
+    },
+    "caller": "speakerlist.go:256",
+    "error": "1 error occurred:\n\t* Failed to join 10.36.32.6:7946: dial tcp 10.36.32.6:7946: i/o timeout\n\n",
+    "expected": 1,
+    "joined": 0,
+    "level": "error",
+    "msg": "partial join",
+    "op": "memberDiscovery",
+    "ts": "2023-11-04T22:10:35Z"
+}

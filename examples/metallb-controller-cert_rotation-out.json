@@ -1,0 +1,27 @@
+{
+    "@timestamp": "2023-11-05T11:08:16Z",
+    "message": "Ensuring CA cert",
+    "event": {
+        "module": "metallb",
+        "kind": "event",
+        "category": ["network"],
+        "severity": 200
+    },
+    "log": {
+        "level": "info",
+        "logger": "cert-rotation"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:metallb"
+            ]
+        }
+    },
+    "misc": [
+        "name:metallb-webhook-configuration",
+        "gvk:admissionregistration.k8s.io/v1, Kind=ValidatingWebhookConfiguration"
+    ]
+}

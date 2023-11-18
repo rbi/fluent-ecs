@@ -1,0 +1,15 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "metallb"
+        }
+    },
+    "level": "info",
+    "ts": "2023-11-05T11:08:16Z",
+    "logger": "cert-rotation",
+    "msg": "Ensuring CA cert",
+    "name": "metallb-webhook-configuration",
+    "gvk": "admissionregistration.k8s.io/v1, Kind=ValidatingWebhookConfiguration",
+    "name": "metallb-webhook-configuration",
+    "gvk": "admissionregistration.k8s.io/v1, Kind=ValidatingWebhookConfiguration"
+}

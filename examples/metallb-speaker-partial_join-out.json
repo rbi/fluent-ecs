@@ -1,0 +1,39 @@
+{
+    "@timestamp": "2023-11-04T22:10:35Z",
+    "message": "1 error occurred:\n\t* Failed to join 10.36.32.6:7946: dial tcp 10.36.32.6:7946: i/o timeout\n\n",
+    "event": {
+        "module": "metallb",
+        "kind": "event",
+        "category": [
+            "network"
+        ],
+        "action": "memberDiscovery",
+        "severity": 400
+    },
+    "log": {
+        "level": "error",
+        "origin": {
+            "file": {
+                "name": "speakerlist.go",
+                "line": 256
+            }
+        }
+    },
+    "error": {
+        "message": "1 error occurred:\n\t* Failed to join 10.36.32.6:7946: dial tcp 10.36.32.6:7946: i/o timeout\n\n"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:metallb"
+            ]
+        }
+    },
+    "misc": [
+        "msg:partial join",
+        "expected:1",
+        "joined:0"
+    ]
+}

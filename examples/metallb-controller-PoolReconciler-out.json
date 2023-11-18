@@ -1,0 +1,31 @@
+{
+    "@timestamp": "2023-11-05T18:07:57Z",
+    "message": "force service reload",
+    "event": {
+        "module": "metallb",
+        "kind": "event",
+        "category": ["network"],
+        "severity": 200
+    },
+    "log": {
+        "level": "info",
+        "origin": {
+            "file":{
+                "name": "pool_controller.go",
+                "line": 107
+            }
+        }
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:metallb"
+            ]
+        }
+    },
+    "misc": [
+        "controller:PoolReconciler"
+    ]
+}

@@ -74,6 +74,9 @@ mod tests {
     #[case("kubernetes-StatefulSet")]
     #[case("kubernetes-Deployment")]
     #[case("metallb-speaker-service_announced")]
+    #[case("metallb-speaker-partial_join")]
+    #[case("metallb-controller-PoolReconciler")]
+    #[case("metallb-controller-cert_rotation")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         let input = fs::read(format!("examples/{}-in.json", test_case))
             .map_err(|err| format!("Input file could not be read: {}", err.to_string()))?;
