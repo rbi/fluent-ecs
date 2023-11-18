@@ -1,7 +1,8 @@
 {
     "@timestamp":"2023-11-16T13:27:38.555+01:00",
     "event": {
-        "kind": "event"
+        "kind": "event",
+        "module": "fluent-ecs"
     },
     "container": {
         "id": "c2a7bdcc846d963411bf718c8edbf3eee2c604f81814f90d051cc6d0efe86b0b",

@@ -66,11 +66,22 @@ pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> Str
 }
 
 fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) {
-    let event = json.event();
-
-    if let None = event.kind {
-        event.kind.get_or_insert("event".to_string());
+    // event
+    {
+        let stream = json.other.remove("stream");
+        let event = json.event();
+        if event.kind == None {
+            event.kind.get_or_insert("event".to_string());
+        }
+        if event.module == None {
+            event.module = Some("fluent-ecs".to_string());
+            if let (None, Some(Value::String(stream))) = (event.dataset.as_ref(), stream) {
+                event.dataset = Some(format!("fluent-ecs.{}", stream));
+            }
+        }
     }
+
+    // time
     if let Some(ts) = json.timestamp {
         if ts - time != Duration::zero() {
             json.event().created = Some(time);
@@ -78,6 +89,9 @@ fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) 
     } else {
         json.timestamp = Some(time);
     }
+    json.other.remove("time"); // This should be the same as the time passed via method arguments.
+
+    // log to message
     match (json.log.as_ref(), json.message.as_ref()) {
         (Some(LogOrString::String(log_string)), Some(_)) => {
             json.misc.push(format!("log:{}", log_string.to_string()));
@@ -89,6 +103,10 @@ fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) 
         }
         _ => {}
     }
+
+    // fluent-bit processing internals
+    json.other.remove("_p");
+
 }
 
 #[cfg(test)]

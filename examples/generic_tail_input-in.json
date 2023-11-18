@@ -1,3 +1,6 @@
 {
-    "log": "generic log message"
+    "log": "generic log message",
+    "_p": "F",
+    "stream": "stderr",
+    "time": "2023-11-18T17:47:43.186477168+01:00"
 }

@@ -111,6 +111,8 @@ pub fn convert_metallb_logs(json: &mut FluentBitJson) {
     json.move_key_to_misc("reason");
     json.move_key_to_misc("expected");
     json.move_key_to_misc("joined");
+    json.move_key_to_misc("start reconcile");
+    json.move_key_to_misc("end reconcile");
 }
 
 fn convert_action(ev: &str) -> Option<String> {

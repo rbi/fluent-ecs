@@ -62,11 +62,13 @@ pub fn convert_etcd_logs(json: &mut FluentBitJson) {
 
     // Remove non-ecs mappings if they exist
     json.move_key_to_misc("hash");
+    json.move_key_to_misc("compact-index");
     json.move_key_to_misc("compact-revision");
     json.move_key_to_misc("expected-duration");
     json.move_key_to_misc("prefix");
     json.move_key_to_misc("request");
     json.move_key_to_misc("response");
+    json.move_key_to_misc("revision");
 }
 
 fn convert_severity(level: &str) -> Option<u32> {
