@@ -4,8 +4,6 @@
       "namespace_name": "chat",
       "pod_id": "f6cafa40-e9c8-4a18-aca1-24b9f559b45a",
       "labels": {
-        "app.kubernetes.io/instance": "bieniek-it-chat",
-        "app.kubernetes.io/name": "synapse",
         "pod-template-hash": "756ff57d9b"
       },
       "host": "jupiter",

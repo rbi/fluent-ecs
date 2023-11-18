@@ -26,8 +26,6 @@
             "name": "synapse-756ff57d9b-zcg45",
             "type": "Pod",
             "label": [
-                "app.kubernetes.io/instance:bieniek-it-chat",
-                "app.kubernetes.io/name:synapse",
                 "pod-template-hash:756ff57d9b"
             ]
         }

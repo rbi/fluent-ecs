@@ -8,6 +8,9 @@
         "severity": 200,
         "created":"2023-11-16T13:27:38.555+01:00"
     },
+    "service": {
+        "type" : "metallb"
+    },
     "log": {
         "level": "info",
         "logger": "cert-rotation"

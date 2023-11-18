@@ -43,6 +43,9 @@ pub fn convert_metallb_logs(json: &mut FluentBitJson) {
         }
     }
 
+    // service
+    json.service().type_val = Some("metallb".to_string());
+
     // event
     {
         let event = json.event();

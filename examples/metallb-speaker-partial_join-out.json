@@ -10,6 +10,9 @@
         "action": "memberDiscovery",
         "severity": 400
     },
+    "service": {
+        "type" : "metallb"
+    },
     "log": {
         "level": "error",
         "origin": {

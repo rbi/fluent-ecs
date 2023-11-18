@@ -313,6 +313,7 @@ pub mod ecs {
                 .get_or_insert_with(|| OrchestratorResourceParent::new())
         }
     }
+
     #[derive(Serialize, Deserialize)]
     pub struct OrchestratorResourceParent {
         #[serde(rename = "type")]
@@ -327,6 +328,37 @@ pub mod ecs {
         pub fn new() -> Self {
             OrchestratorResourceParent {
                 type_val: None,
+                other: Value::Null,
+            }
+        }
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct Service {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub id: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub environment: Option<String>,
+        #[serde(rename = "type")]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub type_val: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub version: Option<String>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl Service {
+        pub fn new() -> Self {
+            Service {
+                id: None,
+                name: None,
+                environment: None,
+                type_val: None,
+                version: None,
                 other: Value::Null,
             }
         }
@@ -398,6 +430,8 @@ pub struct FluentBitJson {
     pub network: Option<ecs::Network>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orchestrator: Option<ecs::Orchestrator>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub service: Option<ecs::Service>,
 
     // other fields
     #[serde(flatten)]
@@ -441,6 +475,9 @@ impl FluentBitJson {
     pub fn orchestrator(&mut self) -> &mut ecs::Orchestrator {
         self.orchestrator
             .get_or_insert_with(|| ecs::Orchestrator::new())
+    }
+    pub fn service(&mut self) -> &mut ecs::Service {
+        self.service.get_or_insert_with(|| ecs::Service::new())
     }
 
     pub fn log(&mut self) -> &mut ecs::Log {

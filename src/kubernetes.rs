@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 use crate::model::fluentbit::Kubernetes;
 use crate::model::FluentBitJson;
 
@@ -13,6 +15,17 @@ fn convert(kubernetes: Kubernetes, json: &mut FluentBitJson) {
     // host
     if let Some(host) = kubernetes.host {
         json.host().hostname = Some(host);
+    }
+
+    // service
+    if let Some(Value::String(env)) = kubernetes.labels.get("app.kubernetes.io/instance") {
+        json.service().environment = Some(env.to_string());
+    }
+    if let Some(Value::String(name)) = kubernetes.labels.get("app.kubernetes.io/name") {
+        json.service().name = Some(name.to_string());
+    }
+    if let Some(Value::String(version)) = kubernetes.labels.get("app.kubernetes.io/version") {
+        json.service().version = Some(version.to_string());
     }
 
     // orchestrator
