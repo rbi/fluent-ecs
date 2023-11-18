@@ -2,6 +2,7 @@ use std::os::raw::c_char;
 use std::slice;
 
 use chrono::{DateTime, Duration, FixedOffset};
+use model::LogOrString;
 use serde_json::Value;
 
 mod kubernetes;
@@ -75,6 +76,17 @@ fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) 
     } else {
         json.timestamp = Some(time);
     }
+    match (json.log.as_ref(), json.message.as_ref()) {
+        (Some(LogOrString::String(log_string)), Some(_)) => {
+            json.misc.push(format!("log:{}", log_string.to_string()));
+            json.log = None;
+        }
+        (Some(LogOrString::String(log_string)), None) => {
+            json.message = Some(log_string.to_string());
+            json.log = None;
+        }
+        _ => {}
+    }
 }
 
 #[cfg(test)]
@@ -87,6 +99,7 @@ mod tests {
     use super::*;
 
     #[rstest]
+    #[case("generic-tail-input")]
     #[case("kubernetes-StatefulSet")]
     #[case("kubernetes-Deployment")]
     #[case("metallb-speaker-service_announced")]

@@ -94,7 +94,7 @@ pub mod ecs {
 
         #[serde(skip_serializing_if = "Option::is_none")]
         pub action: Option<String>,
-        
+
         #[serde(skip_serializing_if = "Option::is_none")]
         pub created: Option<DateTime<FixedOffset>>,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -393,7 +393,7 @@ pub struct FluentBitJson {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub host: Option<ecs::Host>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub log: Option<ecs::Log>,
+    pub log: Option<LogOrString>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub network: Option<ecs::Network>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -421,6 +421,13 @@ pub enum ErrorOrString {
     String(String),
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum LogOrString {
+    Log(ecs::Log),
+    String(String),
+}
+
 impl FluentBitJson {
     pub fn container(&mut self) -> &mut ecs::Container {
         self.container.get_or_insert_with(|| ecs::Container::new())
@@ -428,15 +435,27 @@ impl FluentBitJson {
     pub fn host(&mut self) -> &mut ecs::Host {
         self.host.get_or_insert_with(|| ecs::Host::new())
     }
-    pub fn log(&mut self) -> &mut ecs::Log {
-        self.log.get_or_insert_with(|| ecs::Log::new())
-    }
     pub fn network(&mut self) -> &mut ecs::Network {
         self.network.get_or_insert_with(|| ecs::Network::new())
     }
     pub fn orchestrator(&mut self) -> &mut ecs::Orchestrator {
         self.orchestrator
             .get_or_insert_with(|| ecs::Orchestrator::new())
+    }
+
+    pub fn log(&mut self) -> &mut ecs::Log {
+        match &self.log {
+            Some(LogOrString::Log(_)) => (),
+            _ => {
+                self.log = Some(LogOrString::Log(ecs::Log::new()));
+                ()
+            }
+        };
+
+        match &mut self.log {
+            Some(LogOrString::Log(event)) => event,
+            _ => unreachable!(),
+        }
     }
 
     pub fn event(&mut self) -> &mut ecs::Event {

@@ -1,0 +1,7 @@
+{
+    "@timestamp": "2023-11-16T13:27:38.555+01:00",
+    "message": "generic log message",
+    "event": {
+        "kind": "event"
+    }
+}
