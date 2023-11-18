@@ -1,7 +1,7 @@
 {
     "kubernetes": {
-        "annotations": {
-            "fluent-ecs.bieniek-it.de/parser": "metallb"
+        "labels": {
+            "app.kubernetes.io/name": "metallb"
         }
     },
     "caller": "pool_controller.go:107",

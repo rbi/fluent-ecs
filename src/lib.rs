@@ -39,21 +39,7 @@ pub extern "C" fn fluent_ecs_filter(
 pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> String {
     let mut json: model::FluentBitJson = serde_json::from_slice(record).unwrap();
 
-    let kube = json.kubernetes.as_ref();
-
-    if let Some(Value::String(parser)) =
-        kube.and_then(|k| k.annotations.get("fluent-ecs.bieniek-it.de/parser"))
-    {
-        match parser.as_str() {
-            "metallb" => metallb::convert_metallb_logs(&mut json),
-            _ => {}
-        }
-    } else if let Some(Value::String(component)) = kube.and_then(|k| k.labels.get("component")) {
-        match component.as_str() {
-            "etcd" => etcd::convert_etcd_logs(&mut json),
-            _ => {}
-        }
-    }
+    do_app_specific_conversion(&mut json);
 
     kubernetes::convert_kubernetes_metadata(&mut json);
 
@@ -63,6 +49,47 @@ pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> Str
         Ok(res) => res,
         Err(err) => format!("{{\"fluent-ecs-error\": \"{}\"}}", err),
     }
+}
+
+fn do_app_specific_conversion(json: &mut model::FluentBitJson) {
+    if let Some(Value::String(parser)) = json
+        .kubernetes
+        .as_ref()
+        .and_then(|k| k.annotations.get("fluent-ecs.bieniek-it.de/parser"))
+    {
+        if try_app_specific_conversion(parser.clone().as_str(), json) {
+            return;
+        }
+    }
+
+    if let Some(Value::String(app)) = json
+        .kubernetes
+        .as_ref()
+        .and_then(|k| k.labels.get("app.kubernetes.io/name"))
+    {
+        if try_app_specific_conversion(app.clone().as_str(), json) {
+            return;
+        }
+    }
+
+    if let Some(Value::String(component)) = json
+        .kubernetes
+        .as_ref()
+        .and_then(|k| k.labels.get("component"))
+    {
+        try_app_specific_conversion(component.clone().as_str(), json);
+    }
+}
+
+fn try_app_specific_conversion(app: &str, json: &mut model::FluentBitJson) -> bool {
+    match app {
+        "metallb" => metallb::convert_metallb_logs(json),
+        "etcd" => etcd::convert_etcd_logs(json),
+        _ => {
+            return false;
+        }
+    };
+    true
 }
 
 fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) {
@@ -106,7 +133,6 @@ fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) 
 
     // fluent-bit processing internals
     json.other.remove("_p");
-
 }
 
 #[cfg(test)]

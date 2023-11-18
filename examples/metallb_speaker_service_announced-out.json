@@ -16,6 +16,7 @@
         "created":"2023-11-16T13:27:38.555+01:00"
     },
     "service": {
+        "name": "metallb",
         "type" : "metallb"
     },
     "log": {
@@ -34,8 +35,8 @@
         "type": "kubernetes",
         "resource": {
             "type": "Pod",
-            "annotations": [
-                "fluent-ecs.bieniek-it.de/parser:metallb"
+            "label": [
+                "app.kubernetes.io/name:metallb"
             ]
         }
     },
