@@ -10,6 +10,7 @@ mod model;
 // app log parsers
 mod etcd;
 mod metallb;
+mod postfix;
 
 #[no_mangle]
 pub extern "C" fn fluent_ecs_filter(
@@ -39,7 +40,7 @@ pub extern "C" fn fluent_ecs_filter(
 pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> String {
     let mut json: model::FluentBitJson = serde_json::from_slice(record).unwrap();
 
-    do_app_specific_conversion(&mut json);
+    do_app_specific_conversion(&mut json, &time);
 
     kubernetes::convert_kubernetes_metadata(&mut json);
 
@@ -51,13 +52,13 @@ pub fn fluent_ecs_filter_rust(record: &[u8], time: DateTime<FixedOffset>) -> Str
     }
 }
 
-fn do_app_specific_conversion(json: &mut model::FluentBitJson) {
+fn do_app_specific_conversion(json: &mut model::FluentBitJson, event_date: &DateTime<FixedOffset>) {
     if let Some(Value::String(parser)) = json
         .kubernetes
         .as_ref()
         .and_then(|k| k.annotations.get("fluent-ecs.bieniek-it.de/parser"))
     {
-        if try_app_specific_conversion(parser.clone().as_str(), json) {
+        if try_app_specific_conversion(parser.clone().as_str(), json, &event_date) {
             return;
         }
     }
@@ -67,7 +68,7 @@ fn do_app_specific_conversion(json: &mut model::FluentBitJson) {
         .as_ref()
         .and_then(|k| k.labels.get("app.kubernetes.io/name"))
     {
-        if try_app_specific_conversion(app.clone().as_str(), json) {
+        if try_app_specific_conversion(app.clone().as_str(), json, &event_date) {
             return;
         }
     }
@@ -77,14 +78,19 @@ fn do_app_specific_conversion(json: &mut model::FluentBitJson) {
         .as_ref()
         .and_then(|k| k.labels.get("component"))
     {
-        try_app_specific_conversion(component.clone().as_str(), json);
+        try_app_specific_conversion(component.clone().as_str(), json, &event_date);
     }
 }
 
-fn try_app_specific_conversion(app: &str, json: &mut model::FluentBitJson) -> bool {
+fn try_app_specific_conversion(
+    app: &str,
+    json: &mut model::FluentBitJson,
+    event_date: &DateTime<FixedOffset>,
+) -> bool {
     match app {
         "metallb" => metallb::convert_metallb_logs(json),
         "etcd" => etcd::convert_etcd_logs(json),
+        "postfix" => postfix::convert_postfix_logs(json, event_date),
         _ => {
             return false;
         }
@@ -138,11 +144,23 @@ fn set_basic_data(json: &mut model::FluentBitJson, time: DateTime<FixedOffset>) 
 #[cfg(test)]
 mod tests {
     use assert_json_diff::assert_json_eq;
+    use log::info;
     use rstest::*;
     use serde_json::Value;
-    use std::fs;
+    use std::{fs, sync::Once};
 
     use super::*;
+
+    static INIT_LOGGER: Once = Once::new();
+
+    fn init_logger() {
+        INIT_LOGGER.call_once(|| {
+            let _ = env_logger::builder()
+                .filter_level(log::LevelFilter::max())
+                .is_test(true)
+                .try_init();
+        })
+    }
 
     #[rstest]
     #[case::generic_tail_input("generic_tail_input")]
@@ -154,7 +172,11 @@ mod tests {
     #[case::metallb_controller_cert_rotation("metallb_controller_cert_rotation")]
     #[case::etcd_took("etcd_took")]
     #[case::etcd_warn("etcd_warn")]
+    #[case::postfix_parse_error("postfix/parse_error")]
+    // #[case::postfix_smtpd_connect_from_unknown("postfix/smtpd_connect_from_unknown")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
+        init_logger();
+
         let some_time = DateTime::parse_from_rfc3339("2023-11-16T13:27:38.555+01:00")
             .map_err(|err| err.to_string())?;
         let input = fs::read(format!("examples/{}-in.json", test_case))
@@ -170,7 +192,7 @@ mod tests {
         })?;
 
         let output = format!("examples/{}-out.json", test_case);
-        println!("Output compared against '{}':\n{}\n", output, actual_string);
+        info!("Output compared against '{}':\n{}\n", output, actual_string);
 
         let expected_file =
             fs::read(output).map_err(|err| format!("Output file could not be read: {}", err))?;

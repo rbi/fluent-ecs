@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 15 19:13:57 postfix-6cd77f8c46-22mpd postfix/smtpd[4462]: connect from unknown[10.20.30.40]"
+}

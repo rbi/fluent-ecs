@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "not a postfix log"
+}

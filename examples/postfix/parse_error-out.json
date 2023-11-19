@@ -1,0 +1,20 @@
+{
+    "@timestamp": "2023-11-16T13:27:38.555+01:00",
+    "message": "fluent-ecs postfix parser failed: --> 1:1\n  |\n1 | not a postfix log\n  | ^---\n  |\n  = expected month",
+    "event": {
+        "module": "postfix",
+        "kind": "pipeline_error",
+        "outcome": "failure",
+        "severity": 300,
+        "original": "not a postfix log"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    }
+}

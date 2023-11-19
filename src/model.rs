@@ -101,6 +101,8 @@ pub mod ecs {
         pub severity: Option<u32>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub duration: Option<u64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub original: Option<String>,
 
         #[serde(flatten)]
         pub other: Value,
@@ -119,6 +121,7 @@ pub mod ecs {
                 created: None,
                 severity: None,
                 duration: None,
+                original: None,
                 other: Value::Null,
             }
         }
@@ -335,6 +338,26 @@ pub mod ecs {
             }
         }
     }
+    #[derive(Serialize, Deserialize)]
+    pub struct Process {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub pid: Option<u32>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl Process {
+        pub fn new() -> Self {
+            Process {
+                name: None,
+                pid: None,
+                other: Value::Null,
+            }
+        }
+    }
 
     #[derive(Serialize, Deserialize)]
     pub struct Service {
@@ -434,6 +457,8 @@ pub struct FluentBitJson {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orchestrator: Option<ecs::Orchestrator>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub process: Option<ecs::Process>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub service: Option<ecs::Service>,
 
     // other fields
@@ -478,6 +503,9 @@ impl FluentBitJson {
     pub fn orchestrator(&mut self) -> &mut ecs::Orchestrator {
         self.orchestrator
             .get_or_insert_with(|| ecs::Orchestrator::new())
+    }
+    pub fn process(&mut self) -> &mut ecs::Process {
+        self.process.get_or_insert_with(|| ecs::Process::new())
     }
     pub fn service(&mut self) -> &mut ecs::Service {
         self.service.get_or_insert_with(|| ecs::Service::new())
