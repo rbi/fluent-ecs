@@ -23,9 +23,11 @@ pid = { ASCII_DIGIT+ }
 process_message = { process_smtpd | process_other }
 
 process_smtpd = { "smtpd" ~ "[" ~ pid ~ "]: " ~ message_smtpd }
-message_smtpd = { smtpd_connect | smtpd_disconnect | message_other }
+message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | message_other }
 smtpd_connect = { "connect from " ~ hostname_ip}
-smtpd_disconnect = { "disconnect from " ~ hostname_ip ~ ANY *}
+smtpd_disconnect = { "disconnect from " ~ hostname_ip ~ ANY* }
+smtpd_lost_connection = {smtpd_lost_connection_msg ~ " from " ~ hostname_ip ~ ANY* }
+smtpd_lost_connection_msg = {"lost connection after " ~ not_space+ }
 
 process_other = { process_name ~ "[" ~ pid ~ "]: " ~ message_other }
 process_name = { ASCII_ALPHA+ }
@@ -71,16 +73,17 @@ fn convert_log_missing(json: &mut FluentBitJson) {
 }
 
 fn convert_parse_error(json: &mut FluentBitJson, err: pest::error::Error<Rule>, log: String) {
+    json.message = Some(log);
+
     let err = format!("fluent-ecs postfix parser failed:{}", err.to_string());
     warn!("parsing failed: {}", err);
-    json.message = Some(err);
+    json.error().message = Some(err);
 
     let event = json.event();
     event.module = Some("postfix".to_string());
     event.severity = Some(300);
     event.outcome = Some("failure".to_string());
     event.kind = Some("pipeline_error".to_string());
-    event.original = Some(log);
 }
 
 fn convert_parsed_logs(
@@ -206,7 +209,7 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                             network.transport = Some("tcp".to_string());
 
                             convert_source(json, pair.into_inner());
-                        },
+                        }
                         Rule::smtpd_disconnect => {
                             let event = json.event();
                             event.category.push("network".to_string());
@@ -220,6 +223,31 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                             network.transport = Some("tcp".to_string());
 
                             convert_source(json, pair.into_inner());
+                        }
+                        Rule::smtpd_lost_connection => {
+                            let event = json.event();
+                            event.category.push("network".to_string());
+                            event.type_val.push("connection".to_string());
+                            event.type_val.push("protocol".to_string());
+                            event.outcome = Some("failure".to_string());
+                            event.severity = Some(300);
+
+                            let network = json.network();
+                            network.protocol = Some("smtp".to_string());
+                            network.transport = Some("tcp".to_string());
+
+                            for pair in pair.into_inner() {
+                                match pair.as_rule() {
+                                    Rule::smtpd_lost_connection_msg => {
+                                        json.error().message = Some(pair.as_str().to_string())
+                                    }
+
+                                    Rule::hostname_ip => {
+                                        convert_hostname_ip_to_source(json, pair.into_inner())
+                                    }
+                                    _ => {}
+                                }
+                            }
                         }
                         _ => {}
                     }
@@ -251,18 +279,23 @@ fn convert_pid(json: &mut FluentBitJson, pid: &str) {
 fn convert_source(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
     for pair in pairs {
         match pair.as_rule() {
-            Rule::hostname_ip => {
-                for pair in pair.into_inner() {
-                    match pair.as_rule() {
-                        Rule::hostname => match pair.as_str() {
-                            "unknown" => {}
-                            hostname => json.source().domain = Some(hostname.to_string()),
-                        },
-                        Rule::ip => json.source().ip = Some(pair.as_str().to_string()),
-                        _ => {}
-                    }
-                }
-            }
+            Rule::hostname_ip => convert_hostname_ip_to_source(json, pair.into_inner()),
+            _ => {}
+        }
+    }
+}
+
+fn convert_hostname_ip_to_source(
+    json: &mut FluentBitJson,
+    pairs: pest::iterators::Pairs<'_, Rule>,
+) {
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::hostname => match pair.as_str() {
+                "unknown" => {}
+                hostname => json.source().domain = Some(hostname.to_string()),
+            },
+            Rule::ip => json.source().ip = Some(pair.as_str().to_string()),
             _ => {}
         }
     }

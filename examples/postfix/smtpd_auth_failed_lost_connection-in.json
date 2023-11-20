@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 16 03:24:09 postfix-6cd77f8c46-22mpd postfix/smtpd[4928]: lost connection after AUTH from 55-55-55-55.domain.com[55.55.55.55]"
+}

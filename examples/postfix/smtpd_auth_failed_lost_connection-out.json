@@ -1,0 +1,44 @@
+{
+    "@timestamp": "2023-11-16T03:24:09Z",
+    "message": "lost connection after AUTH from 55-55-55-55.domain.com[55.55.55.55]",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "network"
+        ],
+        "type": [
+            "connection",
+            "protocol"
+        ],
+        "outcome": "failure",
+        "severity": 300,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 16 03:24:09 postfix-6cd77f8c46-22mpd postfix/smtpd[4928]: lost connection after AUTH from 55-55-55-55.domain.com[55.55.55.55]"
+    },
+    "error": {
+        "message": "lost connection after AUTH"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "source": {
+        "ip": "55.55.55.55",
+        "domain": "55-55-55-55.domain.com"
+    },
+    "network":{
+        "protocol": "smtp",
+        "transport": "tcp"
+    },
+    "process": {
+        "name": "smtpd",
+        "pid": 4928
+    }
+}
