@@ -174,6 +174,8 @@ mod tests {
     #[case::etcd_warn("etcd_warn")]
     #[case::postfix_parse_error("postfix/parse_error")]
     #[case::postfix_smtpd_connect_from_unknown("postfix/smtpd_connect_from_unknown")]
+    #[case::postfix_smtpd_connect_from_known("postfix/smtpd_connect_from_known")]
+    #[case::smtpd_disconnect("postfix/smtpd_disconnect")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 

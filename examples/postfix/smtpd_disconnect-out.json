@@ -1,0 +1,40 @@
+{
+    "@timestamp": "2023-11-05T21:43:43Z",
+    "message": "disconnect from unknown[88.66.44.22] ehlo=2 starttls=1 auth=0/1 commands=3/4",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "network"
+        ],
+        "type": [
+            "connection",
+            "end"
+        ],
+        "outcome": "success",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 05 21:43:43 postfix-6cd77f8c46-22mpd postfix/smtpd[83]: disconnect from unknown[88.66.44.22] ehlo=2 starttls=1 auth=0/1 commands=3/4"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "source": {
+        "ip": "88.66.44.22"
+    },
+    "network":{
+        "protocol": "smtp",
+        "transport": "tcp"
+    },
+    "process": {
+        "name": "smtpd",
+        "pid": 83
+    }
+}

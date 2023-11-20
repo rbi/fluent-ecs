@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 05 21:43:43 postfix-6cd77f8c46-22mpd postfix/smtpd[83]: disconnect from unknown[88.66.44.22] ehlo=2 starttls=1 auth=0/1 commands=3/4"
+}

@@ -23,8 +23,9 @@ pid = { ASCII_DIGIT+ }
 process_message = { process_smtpd | process_other }
 
 process_smtpd = { "smtpd" ~ "[" ~ pid ~ "]: " ~ message_smtpd }
-message_smtpd = { smtpd_connect | message_other }
+message_smtpd = { smtpd_connect | smtpd_disconnect | message_other }
 smtpd_connect = { "connect from " ~ hostname_ip}
+smtpd_disconnect = { "disconnect from " ~ hostname_ip ~ ANY *}
 
 process_other = { process_name ~ "[" ~ pid ~ "]: " ~ message_other }
 process_name = { ASCII_ALPHA+ }
@@ -197,6 +198,20 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                             event.category.push("network".to_string());
                             event.type_val.push("connection".to_string());
                             event.type_val.push("start".to_string());
+                            event.outcome = Some("success".to_string());
+                            event.severity = Some(200);
+
+                            let network = json.network();
+                            network.protocol = Some("smtp".to_string());
+                            network.transport = Some("tcp".to_string());
+
+                            convert_source(json, pair.into_inner());
+                        },
+                        Rule::smtpd_disconnect => {
+                            let event = json.event();
+                            event.category.push("network".to_string());
+                            event.type_val.push("connection".to_string());
+                            event.type_val.push("end".to_string());
                             event.outcome = Some("success".to_string());
                             event.severity = Some(200);
 

@@ -1,0 +1,41 @@
+{
+    "@timestamp": "2023-11-15T19:23:07Z",
+    "message": "connect from some.test.domain.de[11.12.13.14]",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "network"
+        ],
+        "type": [
+            "connection",
+            "start"
+        ],
+        "outcome": "success",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 15 19:23:07 postfix-6cd77f8c46-22mpd postfix/smtpd[4470]: connect from some.test.domain.de[11.12.13.14]"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "source": {
+        "ip": "11.12.13.14",
+        "domain": "some.test.domain.de"
+    },
+    "network":{
+        "protocol": "smtp",
+        "transport": "tcp"
+    },
+    "process": {
+        "name": "smtpd",
+        "pid": 4470
+    }
+}
