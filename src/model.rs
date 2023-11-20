@@ -237,6 +237,8 @@ pub mod ecs {
     pub struct Network {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub protocol: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub transport: Option<String>,
 
         #[serde(flatten)]
         pub other: Value,
@@ -246,6 +248,28 @@ pub mod ecs {
         pub fn new() -> Self {
             Network {
                 protocol: None,
+                transport: None,
+                other: Value::Null,
+            }
+        }
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct NetworkEndpoint {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub domain: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub ip: Option<String>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl NetworkEndpoint {
+        pub fn new() -> Self {
+            NetworkEndpoint {
+                domain: None,
+                ip: None,
                 other: Value::Null,
             }
         }
@@ -460,6 +484,8 @@ pub struct FluentBitJson {
     pub process: Option<ecs::Process>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub service: Option<ecs::Service>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<ecs::NetworkEndpoint>,
 
     // other fields
     #[serde(flatten)]
@@ -509,6 +535,9 @@ impl FluentBitJson {
     }
     pub fn service(&mut self) -> &mut ecs::Service {
         self.service.get_or_insert_with(|| ecs::Service::new())
+    }
+    pub fn source(&mut self) -> &mut ecs::NetworkEndpoint {
+        self.source.get_or_insert_with(|| ecs::NetworkEndpoint::new())
     }
 
     pub fn log(&mut self) -> &mut ecs::Log {

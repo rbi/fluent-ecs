@@ -20,17 +20,22 @@ second = { ASCII_DIGIT{2} }
 host = { not_space+ }
 pid = { ASCII_DIGIT+ }
 
-not_space = _{!" " ~ ANY}
-
 process_message = { process_smtpd | process_other }
 
 process_smtpd = { "smtpd" ~ "[" ~ pid ~ "]: " ~ message_smtpd }
-message_smtpd = { ANY* }
+message_smtpd = { smtpd_connect | message_other }
+smtpd_connect = { "connect from " ~ hostname_ip}
 
 process_other = { process_name ~ "[" ~ pid ~ "]: " ~ message_other }
 process_name = { ASCII_ALPHA+ }
 message_other = { ANY* }
 
+// building bocks
+not_space = _{!" " ~ ANY}
+not_bracket = _{!("[" | "]") ~ ANY}
+hostname_ip = { hostname ~ "[" ~ ip ~ "]"}
+hostname = { not_bracket+ }
+ip = { not_bracket+ }
 "#]
 struct PostfixLogParser;
 
@@ -178,9 +183,33 @@ fn convert_date(
 fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
     json.process().name = Some("smtpd".to_string());
 
+    json.event().category.push("email".to_string());
+
     for pair in pairs {
         match pair.as_rule() {
             Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::message_smtpd => {
+                json.message = Some(pair.as_str().to_string());
+                for pair in pair.into_inner() {
+                    match pair.as_rule() {
+                        Rule::smtpd_connect => {
+                            let event = json.event();
+                            event.category.push("network".to_string());
+                            event.type_val.push("connection".to_string());
+                            event.type_val.push("start".to_string());
+                            event.outcome = Some("success".to_string());
+                            event.severity = Some(200);
+
+                            let network = json.network();
+                            network.protocol = Some("smtp".to_string());
+                            network.transport = Some("tcp".to_string());
+
+                            convert_source(json, pair.into_inner());
+                        }
+                        _ => {}
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -191,6 +220,7 @@ fn convert_other(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
         match pair.as_rule() {
             Rule::pid => convert_pid(json, pair.as_str()),
             Rule::process_other => json.process().name = Some(pair.as_str().to_string()),
+            Rule::message_other => json.message = Some(pair.as_str().to_string()),
             _ => {}
         }
     }
@@ -200,5 +230,25 @@ fn convert_pid(json: &mut FluentBitJson, pid: &str) {
     match pid.parse::<u32>() {
         Ok(pid) => json.process().pid = Some(pid),
         Err(_) => {}
+    }
+}
+
+fn convert_source(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::hostname_ip => {
+                for pair in pair.into_inner() {
+                    match pair.as_rule() {
+                        Rule::hostname => match pair.as_str() {
+                            "unknown" => {}
+                            hostname => json.source().domain = Some(hostname.to_string()),
+                        },
+                        Rule::ip => json.source().ip = Some(pair.as_str().to_string()),
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
     }
 }
