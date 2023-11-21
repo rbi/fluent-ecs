@@ -20,6 +20,9 @@
     "error": {
         "message": "lost connection after AUTH"
     },
+    "service":{
+        "type":"postfix"
+    },
     "orchestrator": {
         "type": "kubernetes",
         "resource": {

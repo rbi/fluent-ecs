@@ -109,6 +109,8 @@ fn convert_parse_error(json: &mut FluentBitJson, err: pest::error::Error<Rule>, 
     event.severity = Some(300);
     event.outcome = Some("failure".to_string());
     event.kind = Some("pipeline_error".to_string());
+    
+    json.service().type_val = Some("postfix".to_string());
 }
 
 fn convert_parsed_logs(
@@ -123,6 +125,9 @@ fn convert_parsed_logs(
         event.module = Some("postfix".to_string());
         event.original = Some(log.to_owned());
     }
+
+    // service basics
+    json.service().type_val = Some("postfix".to_string());
 
     for pair in pairs {
         match pair.as_rule() {

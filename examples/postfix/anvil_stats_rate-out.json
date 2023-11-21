@@ -22,6 +22,9 @@
     "network":{
         "protocol": "smtp"
     },
+    "service":{
+        "type":"postfix"
+    },
     "orchestrator": {
         "type": "kubernetes",
         "resource": {

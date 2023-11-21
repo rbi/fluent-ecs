@@ -10,6 +10,9 @@
     "error": {
         "message": "fluent-ecs postfix parser failed: --> 1:1\n  |\n1 | not a postfix log\n  | ^---\n  |\n  = expected month"
     },
+    "service":{
+        "type":"postfix"
+    },
     "orchestrator": {
         "type": "kubernetes",
         "resource": {

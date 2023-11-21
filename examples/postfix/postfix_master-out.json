@@ -16,6 +16,9 @@
         "created":"2023-11-16T13:27:38.555+01:00",
         "original": "Nov  2 18:12:12 postfix-6b94d58c55-gnghr postfix/master[1]: daemon started -- version 3.7.3, configuration /config"
     },
+    "service":{
+        "type":"postfix"
+    },
     "orchestrator": {
         "type": "kubernetes",
         "resource": {

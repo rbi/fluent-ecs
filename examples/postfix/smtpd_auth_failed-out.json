@@ -19,6 +19,9 @@
     "log": {
         "level": "warning"
     },
+    "service":{
+        "type":"postfix"
+    },
     "orchestrator": {
         "type": "kubernetes",
         "resource": {

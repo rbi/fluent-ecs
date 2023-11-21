@@ -21,6 +21,9 @@
             ]
         }
     },
+    "service":{
+        "type":"postfix"
+    },
     "process": {
         "name": "anvil",
         "pid": 87
