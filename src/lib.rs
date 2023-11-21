@@ -181,6 +181,9 @@ mod tests {
     #[case::postfix_script_warn("postfix/postfix_script_warn")]
     #[case::postfix_main("postfix/postfix_main")]
     #[case::postfix_master("postfix/postfix_master")]
+    #[case::anvil_stats_rate("postfix/anvil_stats_rate")]
+    #[case::anvil_stats_count("postfix/anvil_stats_count")]
+    #[case::anvil_stats_cache("postfix/anvil_stats_cache")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 

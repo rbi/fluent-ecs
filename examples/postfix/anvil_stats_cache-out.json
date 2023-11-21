@@ -1,0 +1,28 @@
+{
+    "@timestamp": "2023-11-05T21:47:12Z",
+    "message": "statistics: max cache size 3 at Nov  5 21:43:44",
+    "event": {
+        "module": "postfix",
+        "kind": "metric",
+        "category": [
+            "email"
+        ],
+        "severity": 100,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "end": "2023-11-05T21:43:44Z",
+        "original": "Nov 05 21:47:12 postfix-6cd77f8c46-22mpd postfix/anvil[87]: statistics: max cache size 3 at Nov  5 21:43:44"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "process": {
+        "name": "anvil",
+        "pid": 87
+    }
+}

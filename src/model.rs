@@ -98,6 +98,8 @@ pub mod ecs {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub created: Option<DateTime<FixedOffset>>,
         #[serde(skip_serializing_if = "Option::is_none")]
+        pub end: Option<DateTime<FixedOffset>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub severity: Option<u32>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub duration: Option<u64>,
@@ -119,6 +121,7 @@ pub mod ecs {
                 outcome: None,
                 action: None,
                 created: None,
+                end: None,
                 severity: None,
                 duration: None,
                 original: None,
