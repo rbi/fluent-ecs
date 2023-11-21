@@ -23,11 +23,12 @@ pid = { ASCII_DIGIT+ }
 process_message = { process_smtpd | process_postfix_script | process_anvil | process_master | process_main | process_other }
 
 process_smtpd = { "postfix/smtpd" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_smtpd }
-message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | message_other }
+message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | smtpd_auth_failed | message_other }
 smtpd_connect = { "connect from " ~ hostname_ip}
 smtpd_disconnect = { "disconnect from " ~ hostname_ip ~ ANY* }
 smtpd_lost_connection = {smtpd_lost_connection_msg ~ " from " ~ hostname_ip ~ ANY* }
 smtpd_lost_connection_msg = {"lost connection after " ~ not_space+ }
+smtpd_auth_failed = { hostname_ip ~ ": SASL " ~ not_space+ ~ " authentication failed: " ~ ANY*}
 
 process_postfix_script = { "postfix/postfix-script" ~ "[" ~ pid ~ "]: "~ log_level ~ message_postfix_script }
 message_postfix_script = { postfix_script_starting_postfix | postfix_script_group_writable | message_other }
@@ -278,6 +279,15 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                                 }
                             }
                         }
+                        Rule::smtpd_auth_failed => {
+                            let event = json.event();
+                            event.category.push("authentication".to_string());
+                            event.type_val.push("protocol".to_string());
+                            event.outcome = Some("failure".to_string());
+                            event.severity = Some(300);
+
+                            convert_source(json, pair.into_inner());
+                        }
                         _ => {}
                     }
                 }
@@ -321,9 +331,6 @@ fn convert_postfix_script(json: &mut FluentBitJson, pairs: pest::iterators::Pair
 }
 
 fn convert_anvil(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>, event_date: &DateTime<FixedOffset>) {
-    //     anvil_rate = { "statistics: max " ~ anvil_rate_type ~ " rate " ~ ASCII_DIGIT+ ~ "/" ~ ASCII_DIGIT+ ~ "s for (" ~ anvil_rate_protocol ~ ":" ~ ip ~") at "~ timestamp ~ ANY* }
-    // anvil_rate_type = { "connection" | "message" | "recipient" | "newtls" | "auth" }
-    // anvil_rate_protocol = {!(":") ~ ANY+}
     json.process().name = Some("anvil".to_string());
 
     json.event().kind = Some("metric".to_string());

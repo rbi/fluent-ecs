@@ -184,6 +184,7 @@ mod tests {
     #[case::anvil_stats_rate("postfix/anvil_stats_rate")]
     #[case::anvil_stats_count("postfix/anvil_stats_count")]
     #[case::anvil_stats_cache("postfix/anvil_stats_cache")]
+    #[case::smtpd_auth_failed("postfix/smtpd_auth_failed")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 

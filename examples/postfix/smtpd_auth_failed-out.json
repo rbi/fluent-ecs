@@ -1,0 +1,38 @@
+{
+    "@timestamp": "2023-11-16T02:42:02Z",
+    "message": "unknown[88.77.66.55]: SASL PLAIN authentication failed: ",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "authentication"
+        ],
+        "type": [
+            "protocol"
+        ],
+        "outcome": "failure",
+        "severity": 300,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 16 02:42:02 postfix-6cd77f8c46-22mpd postfix/smtpd[4888]: warning: unknown[88.77.66.55]: SASL PLAIN authentication failed: "
+    },
+    "log": {
+        "level": "warning"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "source": {
+        "ip": "88.77.66.55"
+    },
+    "process": {
+        "name": "smtpd",
+        "pid": 4888
+    }
+}
