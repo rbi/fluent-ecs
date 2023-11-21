@@ -8,30 +8,46 @@ use crate::model::{FluentBitJson, LogOrString};
 
 #[derive(Parser)]
 #[grammar_inline = r#"
-postfix_log = { SOI ~ timestamp ~ " " ~ host ~ " " ~ "postfix/" ~ process_message ~ EOI}
+postfix_log = { SOI ~ timestamp ~ " " ~ host ~ " " ~ process_message ~ EOI}
 
-timestamp = { month ~ " " ~ day ~ " " ~ hour ~ ":" ~ minute ~ ":" ~ second }
+timestamp = { month ~ " "+ ~ day ~ " "+ ~ hour ~ ":" ~ minute ~ ":" ~ second }
 month = { "Jan" | "Feb" | "Mar" | "Apr" | "May" | "Jun" | "Jul" | "Aug" | "Sep" | "Oct" | "Nov" | "Dec" }
-day = { ASCII_DIGIT{2} }
-hour = { ASCII_DIGIT{2} }
-minute = { ASCII_DIGIT{2} }
-second = { ASCII_DIGIT{2} }
+day = { ASCII_DIGIT{1,2} }
+hour = { ASCII_DIGIT{1,2} }
+minute = { ASCII_DIGIT{1,2} }
+second = { ASCII_DIGIT{1,2} }
 
 host = { not_space+ }
 pid = { ASCII_DIGIT+ }
 
-process_message = { process_smtpd | process_other }
+process_message = { process_smtpd | process_postfix_script | process_master | process_main | process_other }
 
-process_smtpd = { "smtpd" ~ "[" ~ pid ~ "]: " ~ message_smtpd }
+process_smtpd = { "postfix/smtpd" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_smtpd }
 message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | message_other }
 smtpd_connect = { "connect from " ~ hostname_ip}
 smtpd_disconnect = { "disconnect from " ~ hostname_ip ~ ANY* }
 smtpd_lost_connection = {smtpd_lost_connection_msg ~ " from " ~ hostname_ip ~ ANY* }
 smtpd_lost_connection_msg = {"lost connection after " ~ not_space+ }
 
-process_other = { process_name ~ "[" ~ pid ~ "]: " ~ message_other }
-process_name = { ASCII_ALPHA+ }
+process_postfix_script = { "postfix/postfix-script" ~ "[" ~ pid ~ "]: "~ log_level ~ message_postfix_script }
+message_postfix_script = { postfix_script_starting_postfix | postfix_script_group_writable | message_other }
+postfix_script_starting_postfix = { "starting the Postfix mail system" }
+postfix_script_group_writable = { "group or other writable:" ~ ANY* }
+
+process_master = { "postfix/master" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_master }
+message_master = { master_daemon_started | message_other }
+master_daemon_started = { "daemon started -- " ~ ANY* }
+
+process_main = { "postfix" ~ "[" ~ pid ~ "]: "~ log_level ~ message_main }
+message_main = { message_other }
+
+process_other = { "postfix/" ~ process_name ~ "[" ~ pid ~ "]: "~ log_level ~ message_other }
+process_name = { not_bracket+ }
 message_other = { ANY* }
+
+// log level
+log_level = { log_level_warning? }
+log_level_warning = { "warning: " }
 
 // building bocks
 not_space = _{!" " ~ ANY}
@@ -111,6 +127,11 @@ fn convert_parsed_logs(
                             for pair in pair.into_inner() {
                                 match pair.as_rule() {
                                     Rule::process_smtpd => convert_smtpd(json, pair.into_inner()),
+                                    Rule::process_postfix_script => {
+                                        convert_postfix_script(json, pair.into_inner())
+                                    }
+                                    Rule::process_master => convert_master(json, pair.into_inner()),
+                                    Rule::process_main => convert_main(json, pair.into_inner()),
                                     Rule::process_other => convert_other(json, pair.into_inner()),
                                     _ => {}
                                 }
@@ -192,6 +213,7 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
     for pair in pairs {
         match pair.as_rule() {
             Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
             Rule::message_smtpd => {
                 json.message = Some(pair.as_str().to_string());
                 for pair in pair.into_inner() {
@@ -202,7 +224,6 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                             event.type_val.push("connection".to_string());
                             event.type_val.push("start".to_string());
                             event.outcome = Some("success".to_string());
-                            event.severity = Some(200);
 
                             let network = json.network();
                             network.protocol = Some("smtp".to_string());
@@ -216,7 +237,6 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                             event.type_val.push("connection".to_string());
                             event.type_val.push("end".to_string());
                             event.outcome = Some("success".to_string());
-                            event.severity = Some(200);
 
                             let network = json.network();
                             network.protocol = Some("smtp".to_string());
@@ -258,10 +278,85 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
     }
 }
 
+fn convert_postfix_script(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
+    json.process().name = Some("postfix-script".to_string());
+
+    json.event().category.push("email".to_string());
+
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
+            Rule::message_postfix_script => {
+                json.message = Some(pair.as_str().to_string());
+                for pair in pair.into_inner() {
+                    match pair.as_rule() {
+                        Rule::postfix_script_starting_postfix => {
+                            let event = json.event();
+                            event.category.push("process".to_string());
+                            event.type_val.push("start".to_string());
+                            event.outcome = Some("unknown".to_string());
+                        },
+                        Rule::postfix_script_group_writable => {
+                            let event = json.event();
+                            event.category.push("file".to_string());
+                            event.type_val.push("info".to_string());
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn convert_master(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
+    json.process().name = Some("master".to_string());
+
+    json.event().category.push("email".to_string());
+
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
+            Rule::message_master => {
+                json.message = Some(pair.as_str().to_string());
+                for pair in pair.into_inner() {
+                    match pair.as_rule() {
+                        Rule::master_daemon_started => {
+                            let event = json.event();
+                            event.category.push("process".to_string());
+                            event.type_val.push("start".to_string());
+                            event.outcome = Some("success".to_string());
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn convert_main(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
+    json.event().category.push("email".to_string());
+
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
+            Rule::message_main => json.message = Some(pair.as_str().to_string()),
+            _ => {}
+        }
+    }
+}
+
 fn convert_other(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
     for pair in pairs {
         match pair.as_rule() {
             Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
             Rule::process_other => json.process().name = Some(pair.as_str().to_string()),
             Rule::message_other => json.message = Some(pair.as_str().to_string()),
             _ => {}
@@ -273,6 +368,19 @@ fn convert_pid(json: &mut FluentBitJson, pid: &str) {
     match pid.parse::<u32>() {
         Ok(pid) => json.process().pid = Some(pid),
         Err(_) => {}
+    }
+}
+
+fn convert_log_level(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
+    json.event().severity = Some(200);
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::log_level_warning => {
+                json.event().severity = Some(300);
+                json.log().level = Some("warning".to_string());
+            },
+            _ => {}
+        }
     }
 }
 

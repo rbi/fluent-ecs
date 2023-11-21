@@ -177,6 +177,10 @@ mod tests {
     #[case::postfix_smtpd_connect_from_known("postfix/smtpd_connect_from_known")]
     #[case::smtpd_disconnect("postfix/smtpd_disconnect")]
     #[case::smtpd_auth_failed_lost_connection("postfix/smtpd_auth_failed_lost_connection")]
+    #[case::postfix_script_info("postfix/postfix_script_info")]
+    #[case::postfix_script_warn("postfix/postfix_script_warn")]
+    #[case::postfix_main("postfix/postfix_main")]
+    #[case::postfix_master("postfix/postfix_master")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 

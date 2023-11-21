@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 20 19:30:09 postfix-6b94d58c55-69p9n postfix/postfix-script[80]: starting the Postfix mail system"
+}

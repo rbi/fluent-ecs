@@ -1,0 +1,32 @@
+{
+    "@timestamp": "2023-11-20T19:30:09Z",
+    "message": "starting the Postfix mail system",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "process"
+        ],
+        "type": [
+            "start"
+        ],
+        "outcome": "unknown",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 20 19:30:09 postfix-6b94d58c55-69p9n postfix/postfix-script[80]: starting the Postfix mail system"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "process": {
+        "name": "postfix-script",
+        "pid": 80
+    }
+}
