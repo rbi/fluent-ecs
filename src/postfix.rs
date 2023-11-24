@@ -32,8 +32,9 @@ smtpd_auth_failed = { hostname_ip ~ ": SASL " ~ not_space+ ~ " authentication fa
 smtpd_mail_open_stream = { queue_id ~ ": client=" ~ hostname_ip ~ (", " ~ key_value_pair*)? }
 
 process_qmgr = { "postfix/qmgr" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_qmgr }
-message_qmgr = { qmgr_queue_active | message_other}
-qmgr_queue_active = {queue_id ~ ": " ~ key_value_pair* ~ "(queue active)" }
+message_qmgr = { qmgr_queue_active | qmgr_queue_removed | message_other}
+qmgr_queue_active = { queue_id ~ ": " ~ key_value_pair* ~ "(queue active)" }
+qmgr_queue_removed = { queue_id ~ ": removed" }
 
 process_postfix_script = { "postfix/postfix-script" ~ "[" ~ pid ~ "]: "~ log_level ~ message_postfix_script }
 message_postfix_script = { postfix_script_starting_postfix | postfix_script_group_writable | message_other }
@@ -378,7 +379,7 @@ fn convert_qmgr(
                 json.message = Some(pair.as_str().to_string());
                 for pair in pair.into_inner() {
                     match pair.as_rule() {
-                        Rule::qmgr_queue_active => {
+                        Rule::qmgr_queue_active | Rule::qmgr_queue_removed => {
                             for pair in pair.into_inner() {
                                 match pair.as_rule() {
                                     Rule::queue_id => convert_queue_id(json, pair.as_str(), host),
