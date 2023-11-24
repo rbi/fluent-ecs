@@ -20,7 +20,7 @@ second = { ASCII_DIGIT{1,2} }
 host = { not_space+ }
 pid = { ASCII_DIGIT+ }
 
-process_message = { process_smtpd | process_postfix_script | process_anvil | process_master | process_main | process_other }
+process_message = { process_smtpd | process_qmgr | process_postfix_script | process_anvil | process_master | process_main | process_other }
 
 process_smtpd = { "postfix/smtpd" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_smtpd }
 message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | smtpd_auth_failed | smtpd_mail_open_stream | message_other }
@@ -30,6 +30,10 @@ smtpd_lost_connection = {smtpd_lost_connection_msg ~ " from " ~ hostname_ip ~ AN
 smtpd_lost_connection_msg = {"lost connection after " ~ not_space+ }
 smtpd_auth_failed = { hostname_ip ~ ": SASL " ~ not_space+ ~ " authentication failed: " ~ ANY*}
 smtpd_mail_open_stream = { queue_id ~ ": client=" ~ hostname_ip ~ (", " ~ key_value_pair*)? }
+
+process_qmgr = { "postfix/qmgr" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_qmgr }
+message_qmgr = { qmgr_queue_active | message_other}
+qmgr_queue_active = {queue_id ~ ": " ~ key_value_pair* ~ "(queue active)" }
 
 process_postfix_script = { "postfix/postfix-script" ~ "[" ~ pid ~ "]: "~ log_level ~ message_postfix_script }
 message_postfix_script = { postfix_script_starting_postfix | postfix_script_group_writable | message_other }
@@ -150,6 +154,9 @@ fn convert_parsed_logs(
                                 match pair.as_rule() {
                                     Rule::process_smtpd => {
                                         convert_smtpd(json, pair.into_inner(), host)
+                                    }
+                                    Rule::process_qmgr => {
+                                        convert_qmgr(json, pair.into_inner(), host)
                                     }
                                     Rule::process_postfix_script => {
                                         convert_postfix_script(json, pair.into_inner())
@@ -341,6 +348,42 @@ fn convert_smtpd(
                                             json.user().name = Some(value.to_string());
                                         }
                                     }
+                                    _ => {}
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn convert_qmgr(
+    json: &mut FluentBitJson,
+    pairs: pest::iterators::Pairs<'_, Rule>,
+    host: Option<&str>,
+) {
+    json.process().name = Some("qmgr".to_string());
+
+    json.event().category.push("email".to_string());
+
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
+            Rule::message_qmgr => {
+                json.message = Some(pair.as_str().to_string());
+                for pair in pair.into_inner() {
+                    match pair.as_rule() {
+                        Rule::qmgr_queue_active => {
+                            for pair in pair.into_inner() {
+                                match pair.as_rule() {
+                                    Rule::queue_id => convert_queue_id(json, pair.as_str(), host),
+                                    // The pairs contains "from" which is the SMTP "MAIL FROM". There is field for this
+                                    // in ECS. The E-Mail fields in ECS are intended for actual mail content.
                                     _ => {}
                                 }
                             }

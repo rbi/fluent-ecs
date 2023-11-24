@@ -1,0 +1,14 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 18 06:23:07 postfix-6cd77f8c46-22mpd postfix/qmgr[81]: 1DC4D985C10: from=<SRS0=4RZM=G7=somedomain.de=bounce@def.abc.de>, size=49138, nrcpt=1 (queue active)"
+}
+
+
+
+
+
+

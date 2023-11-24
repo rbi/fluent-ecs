@@ -187,6 +187,8 @@ mod tests {
     #[case::smtpd_auth_failed("postfix/smtpd_auth_failed")]
     #[case::smtpd_auth("postfix/smtpd_auth")]
     #[case::smtpd_non_auth("postfix/smtpd_non_auth")]
+    #[case::smtpd_non_auth("postfix/smtpd_non_auth")]
+    #[case::qmgr_from("postfix/qmgr_from")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 
