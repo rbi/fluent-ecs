@@ -416,6 +416,42 @@ pub mod ecs {
             }
         }
     }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct Transaction {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub id: Option<String>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl Transaction {
+        pub fn new() -> Self {
+            Transaction {
+                id: None,
+                other: Value::Null,
+            }
+        }
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct User {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub name: Option<String>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl User {
+        pub fn new() -> Self {
+            User {
+                name: None,
+                other: Value::Null,
+            }
+        }
+    }
 }
 
 pub mod fluentbit {
@@ -489,6 +525,10 @@ pub struct FluentBitJson {
     pub service: Option<ecs::Service>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<ecs::NetworkEndpoint>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transaction: Option<ecs::Transaction>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<ecs::User>,
 
     // other fields
     #[serde(flatten)]
@@ -540,7 +580,15 @@ impl FluentBitJson {
         self.service.get_or_insert_with(|| ecs::Service::new())
     }
     pub fn source(&mut self) -> &mut ecs::NetworkEndpoint {
-        self.source.get_or_insert_with(|| ecs::NetworkEndpoint::new())
+        self.source
+            .get_or_insert_with(|| ecs::NetworkEndpoint::new())
+    }
+    pub fn transaction(&mut self) -> &mut ecs::Transaction {
+        self.transaction
+            .get_or_insert_with(|| ecs::Transaction::new())
+    }
+    pub fn user(&mut self) -> &mut ecs::User {
+        self.user.get_or_insert_with(|| ecs::User::new())
     }
 
     pub fn log(&mut self) -> &mut ecs::Log {

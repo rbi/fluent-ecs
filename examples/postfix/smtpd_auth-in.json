@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 23 19:07:32 postfix-6b94d58c55-l2s7h postfix/smtpd[1243]: 61024B42AB3: client=unknown[fdb1:9292:af59:c000::503], sasl_method=XOAUTH2, sasl_username=someUser"
+}

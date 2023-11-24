@@ -1,0 +1,48 @@
+{
+    "@timestamp": "2023-11-23T19:07:32Z",
+    "message": "61024B42AB3: client=unknown[fdb1:9292:af59:c000::503], sasl_method=XOAUTH2, sasl_username=someUser",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "authentication"
+        ],
+        "type": [
+            "connection"
+        ],
+        "outcome": "success",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 23 19:07:32 postfix-6b94d58c55-l2s7h postfix/smtpd[1243]: 61024B42AB3: client=unknown[fdb1:9292:af59:c000::503], sasl_method=XOAUTH2, sasl_username=someUser"
+    },
+    "service":{
+        "type":"postfix"
+    },
+    "network": {
+        "protocol": "smtp",
+        "transport": "tcp"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "source": {
+        "ip": "fdb1:9292:af59:c000::503"
+    },
+    "user": {
+        "name": "someUser"
+    },
+    "transaction":{
+        "id": "postfix-6b94d58c55-l2s7h.61024B42AB3"
+    },
+    "process": {
+        "name": "smtpd",
+        "pid": 1243
+    }
+}

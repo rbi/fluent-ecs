@@ -1,0 +1,45 @@
+{
+    "@timestamp": "2023-11-18T06:23:06Z",
+    "message": "1DC4D985C10: client=some-client.somedomain.de[88.68.22.49]",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email"
+        ],
+        "type": [
+            "connection"
+        ],
+        "outcome": "success",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 18 06:23:06 postfix-6cd77f8c46-22mpd postfix/smtpd[7821]: 1DC4D985C10: client=some-client.somedomain.de[88.68.22.49]"
+    },
+    "service":{
+        "type":"postfix"
+    },
+    "network": {
+        "protocol": "smtp",
+        "transport": "tcp"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "source": {
+        "ip": "88.68.22.49",
+        "domain": "some-client.somedomain.de"
+    },
+    "transaction":{
+        "id": "postfix-6cd77f8c46-22mpd.1DC4D985C10"
+    },
+    "process": {
+        "name": "smtpd",
+        "pid": 7821
+    }
+}

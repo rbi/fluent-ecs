@@ -23,12 +23,13 @@ pid = { ASCII_DIGIT+ }
 process_message = { process_smtpd | process_postfix_script | process_anvil | process_master | process_main | process_other }
 
 process_smtpd = { "postfix/smtpd" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_smtpd }
-message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | smtpd_auth_failed | message_other }
+message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | smtpd_auth_failed | smtpd_mail_open_stream | message_other }
 smtpd_connect = { "connect from " ~ hostname_ip}
 smtpd_disconnect = { "disconnect from " ~ hostname_ip ~ ANY* }
 smtpd_lost_connection = {smtpd_lost_connection_msg ~ " from " ~ hostname_ip ~ ANY* }
 smtpd_lost_connection_msg = {"lost connection after " ~ not_space+ }
 smtpd_auth_failed = { hostname_ip ~ ": SASL " ~ not_space+ ~ " authentication failed: " ~ ANY*}
+smtpd_mail_open_stream = { queue_id ~ ": client=" ~ hostname_ip ~ (", " ~ key_value_pair*)? }
 
 process_postfix_script = { "postfix/postfix-script" ~ "[" ~ pid ~ "]: "~ log_level ~ message_postfix_script }
 message_postfix_script = { postfix_script_starting_postfix | postfix_script_group_writable | message_other }
@@ -59,6 +60,10 @@ log_level = { log_level_warning? }
 log_level_warning = { "warning: " }
 
 // building bocks
+queue_id = { "NOQUEUE" | (!(":" | " ") ~ ASCII_ALPHANUMERIC)+}
+key_value_pair = { key ~ "=" ~ value ~ ","? ~ " "? }
+key = { (ASCII_ALPHA_LOWER | "_" | "-" )+ }
+value = { (!("," | " ") ~ ANY)+ }
 not_space = _{!" " ~ ANY}
 not_bracket = _{!("[" | "]" | "(" | ")" ) ~ ANY}
 hostname_ip = { hostname ~ "[" ~ ip ~ "]"}
@@ -109,7 +114,7 @@ fn convert_parse_error(json: &mut FluentBitJson, err: pest::error::Error<Rule>, 
     event.severity = Some(300);
     event.outcome = Some("failure".to_string());
     event.kind = Some("pipeline_error".to_string());
-    
+
     json.service().type_val = Some("postfix".to_string());
 }
 
@@ -129,6 +134,8 @@ fn convert_parsed_logs(
     // service basics
     json.service().type_val = Some("postfix".to_string());
 
+    let mut host = None;
+
     for pair in pairs {
         match pair.as_rule() {
             Rule::postfix_log => {
@@ -137,14 +144,19 @@ fn convert_parsed_logs(
                         Rule::timestamp => {
                             json.timestamp = convert_date(pair.into_inner(), event_date)
                         }
+                        Rule::host => host = Some(pair.as_str()),
                         Rule::process_message => {
                             for pair in pair.into_inner() {
                                 match pair.as_rule() {
-                                    Rule::process_smtpd => convert_smtpd(json, pair.into_inner()),
+                                    Rule::process_smtpd => {
+                                        convert_smtpd(json, pair.into_inner(), host)
+                                    }
                                     Rule::process_postfix_script => {
                                         convert_postfix_script(json, pair.into_inner())
                                     }
-                                    Rule::process_anvil => convert_anvil(json, pair.into_inner(), event_date),
+                                    Rule::process_anvil => {
+                                        convert_anvil(json, pair.into_inner(), event_date)
+                                    }
                                     Rule::process_master => convert_master(json, pair.into_inner()),
                                     Rule::process_main => convert_main(json, pair.into_inner()),
                                     Rule::process_other => convert_other(json, pair.into_inner()),
@@ -220,7 +232,11 @@ fn convert_date(
     )
 }
 
-fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
+fn convert_smtpd(
+    json: &mut FluentBitJson,
+    pairs: pest::iterators::Pairs<'_, Rule>,
+    host: Option<&str>,
+) {
     json.process().name = Some("smtpd".to_string());
 
     json.event().category.push("email".to_string());
@@ -293,6 +309,42 @@ fn convert_smtpd(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
 
                             convert_source(json, pair.into_inner());
                         }
+                        Rule::smtpd_mail_open_stream => {
+                            let event = json.event();
+                            event.type_val.push("connection".to_string());
+                            event.outcome = Some("success".to_string());
+
+                            let network = json.network();
+                            network.protocol = Some("smtp".to_string());
+                            network.transport = Some("tcp".to_string());
+
+                            for pair in pair.into_inner() {
+                                match pair.as_rule() {
+                                    Rule::queue_id => convert_queue_id(json, pair.as_str(), host),
+                                    Rule::hostname_ip => {
+                                        convert_hostname_ip_to_source(json, pair.into_inner())
+                                    }
+                                    Rule::key_value_pair => {
+                                        let mut key = None;
+                                        let mut value = None;
+                                        for pair in pair.into_inner() {
+                                            match pair.as_rule() {
+                                                Rule::key => key = Some(pair.as_str()),
+                                                Rule::value => value = Some(pair.as_str()),
+                                                _ => {}
+                                            }
+                                        }
+                                        if let (Some("sasl_username"), Some(value)) = (key, value) {
+                                            json.event()
+                                                .category
+                                                .push("authentication".to_string());
+                                            json.user().name = Some(value.to_string());
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
                         _ => {}
                     }
                 }
@@ -335,7 +387,11 @@ fn convert_postfix_script(json: &mut FluentBitJson, pairs: pest::iterators::Pair
     }
 }
 
-fn convert_anvil(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>, event_date: &DateTime<FixedOffset>) {
+fn convert_anvil(
+    json: &mut FluentBitJson,
+    pairs: pest::iterators::Pairs<'_, Rule>,
+    event_date: &DateTime<FixedOffset>,
+) {
     json.process().name = Some("anvil".to_string());
 
     json.event().kind = Some("metric".to_string());
@@ -363,7 +419,10 @@ fn convert_anvil(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                                         json.network().protocol = Some(pair.as_str().to_string())
                                     }
                                     Rule::ip => json.source().ip = Some(pair.as_str().to_string()),
-                                    Rule::timestamp => json.event().end = convert_date(pair.into_inner(), event_date),
+                                    Rule::timestamp => {
+                                        json.event().end =
+                                            convert_date(pair.into_inner(), event_date)
+                                    }
                                     _ => {}
                                 }
                             }
@@ -371,7 +430,7 @@ fn convert_anvil(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rul
                         _ => {}
                     }
                 }
-            },
+            }
             _ => {}
         }
     }
@@ -472,5 +531,15 @@ fn convert_hostname_ip_to_source(
             Rule::ip => json.source().ip = Some(pair.as_str().to_string()),
             _ => {}
         }
+    }
+}
+
+fn convert_queue_id(json: &mut FluentBitJson, queue_id: &str, host: Option<&str>) {
+    if queue_id == "NOQUEUE" {
+        return;
+    }
+    match host {
+        Some(host) => json.transaction().id = Some(format!("{}.{}", host, queue_id)),
+        None => json.transaction().id = Some(queue_id.to_string()),
     }
 }

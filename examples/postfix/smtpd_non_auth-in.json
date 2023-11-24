@@ -1,0 +1,14 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 18 06:23:06 postfix-6cd77f8c46-22mpd postfix/smtpd[7821]: 1DC4D985C10: client=some-client.somedomain.de[88.68.22.49]"
+}
+
+
+
+
+
+
