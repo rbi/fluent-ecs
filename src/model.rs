@@ -149,6 +149,24 @@ pub mod ecs {
     }
 
     #[derive(Serialize, Deserialize)]
+    pub struct Email {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub message_id: Option<String>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl Email {
+        pub fn new() -> Self {
+            Email {
+                message_id: None,
+                other: Value::Null,
+            }
+        }
+    }
+
+    #[derive(Serialize, Deserialize)]
     pub struct Host {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub hostname: Option<String>,
@@ -510,6 +528,8 @@ pub struct FluentBitJson {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<ErrorOrString>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<ecs::Email>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub container: Option<ecs::Container>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub host: Option<ecs::Host>,
@@ -562,6 +582,9 @@ pub enum LogOrString {
 impl FluentBitJson {
     pub fn container(&mut self) -> &mut ecs::Container {
         self.container.get_or_insert_with(|| ecs::Container::new())
+    }
+    pub fn email(&mut self) -> &mut ecs::Email {
+        self.email.get_or_insert_with(|| ecs::Email::new())
     }
     pub fn host(&mut self) -> &mut ecs::Host {
         self.host.get_or_insert_with(|| ecs::Host::new())

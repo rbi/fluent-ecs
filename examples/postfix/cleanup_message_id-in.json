@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 18 06:23:06 postfix-6cd77f8c46-22mpd postfix/cleanup[7826]: 1DC4D985C10: message-id=<81490e51049b91aa114909571acb174e@somedomain.de>"
+}
