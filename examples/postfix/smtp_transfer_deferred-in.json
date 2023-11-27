@@ -1,0 +1,9 @@
+
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 26 21:26:04 postfix-59cd6c8465-9ktgj postfix/smtp[1841]: CA346B42AB0: to=<external_user@externmail.com>, relay=none, delay=6.7, delays=1.6/0.07/5/0, dsn=4.4.1, status=deferred (connect to abc123[88.33.55.33]:25: Connection refused)"
+}

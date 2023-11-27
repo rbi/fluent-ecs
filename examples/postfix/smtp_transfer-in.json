@@ -1,0 +1,11 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 23 19:07:33 postfix-6b94d58c55-l2s7h postfix/smtp[1252]: 61024B42AB3: to=<a_user@a_domain.com>, relay=some_relay[1.2.3.4]:25, delay=1.6, delays=1.2/0.02/0.31/0.1, dsn=2.0.0, status=sent (250 OK queued as 6ac6dc75-e6a5-4ae4-9b1b-9855e7fb302b)"
+}
+
+
+

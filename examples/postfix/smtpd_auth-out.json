@@ -9,7 +9,8 @@
             "authentication"
         ],
         "type": [
-            "connection"
+            "connection",
+            "user"
         ],
         "outcome": "success",
         "severity": 200,

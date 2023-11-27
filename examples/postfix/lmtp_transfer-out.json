@@ -1,0 +1,45 @@
+{
+    "@timestamp": "2023-11-18T06:23:07Z",
+    "message": "1DC4D985C10: to=<localuser@mydomain.de>, relay=nexthop.namespace.svc.cluster.local[10.42.12.43]:12345, delay=1.9, delays=1.7/0.02/0.04/0.1, dsn=2.0.0, status=sent (250 2.0.0 <localuser@mydomain.de>> SKifKz2tY2UaBAAAaOK3MA Saved)",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "protocol"
+        ],
+        "action": "mail-transfer",
+        "outcome": "success",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 18 06:23:07 postfix-6cd77f8c46-22mpd postfix/lmtp[7827]: 1DC4D985C10: to=<localuser@mydomain.de>, relay=nexthop.namespace.svc.cluster.local[10.42.12.43]:12345, delay=1.9, delays=1.7/0.02/0.04/0.1, dsn=2.0.0, status=sent (250 2.0.0 <localuser@mydomain.de>> SKifKz2tY2UaBAAAaOK3MA Saved)"
+    },
+    "service":{
+        "type":"postfix"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "destination": {
+        "domain": "nexthop.namespace.svc.cluster.local",
+        "ip": "10.42.12.43",
+        "port": 12345
+    },
+    "network": {
+        "protocol": "lmtp",
+        "transport": "tcp"
+    },
+    "transaction":{
+        "id": "postfix-6cd77f8c46-22mpd.1DC4D985C10"
+    },
+    "process": {
+        "name": "lmtp",
+        "pid": 7827
+    }
+}

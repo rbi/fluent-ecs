@@ -281,6 +281,8 @@ pub mod ecs {
         pub domain: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub ip: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub port: Option<u16>,
 
         #[serde(flatten)]
         pub other: Value,
@@ -291,6 +293,7 @@ pub mod ecs {
             NetworkEndpoint {
                 domain: None,
                 ip: None,
+                port: None,
                 other: Value::Null,
             }
         }
@@ -524,6 +527,8 @@ pub struct FluentBitJson {
     pub message: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub destination: Option<ecs::NetworkEndpoint>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub event: Option<EventOrString>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<ErrorOrString>,
@@ -582,6 +587,10 @@ pub enum LogOrString {
 impl FluentBitJson {
     pub fn container(&mut self) -> &mut ecs::Container {
         self.container.get_or_insert_with(|| ecs::Container::new())
+    }
+    pub fn destination(&mut self) -> &mut ecs::NetworkEndpoint {
+        self.destination
+            .get_or_insert_with(|| ecs::NetworkEndpoint::new())
     }
     pub fn email(&mut self) -> &mut ecs::Email {
         self.email.get_or_insert_with(|| ecs::Email::new())

@@ -4,7 +4,7 @@ use log::warn;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::model::{FluentBitJson, LogOrString};
+use crate::model::{ecs::NetworkEndpoint, FluentBitJson, LogOrString};
 
 #[derive(Parser)]
 #[grammar_inline = r#"
@@ -20,7 +20,7 @@ second = { ASCII_DIGIT{1,2} }
 host = { not_space+ }
 pid = { ASCII_DIGIT+ }
 
-process_message = { process_smtpd | process_qmgr | process_cleanup | process_postfix_script | process_anvil | process_master | process_main | process_other }
+process_message = { process_smtpd | process_qmgr | process_smtp_lmtp | process_cleanup | process_postfix_script | process_anvil | process_master | process_main | process_other }
 
 process_smtpd = { "postfix/smtpd" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_smtpd }
 message_smtpd = { smtpd_connect | smtpd_disconnect | smtpd_lost_connection | smtpd_auth_failed | smtpd_mail_open_stream | message_other }
@@ -35,6 +35,12 @@ process_qmgr = { "postfix/qmgr" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_qmgr }
 message_qmgr = { qmgr_queue_active | qmgr_queue_removed | message_other}
 qmgr_queue_active = { queue_id ~ ": " ~ key_value_pair* ~ "(queue active)" }
 qmgr_queue_removed = { queue_id ~ ": removed" }
+
+process_smtp_lmtp = { "postfix/" ~ (process_smtp | process_lmtp) ~ "[" ~ pid ~ "]: " ~ log_level ~ message_smtp_lmtp }
+process_smtp = {"smtp"}
+process_lmtp = {"lmtp"}
+message_smtp_lmtp = { smtp_lmtp_transfer_mail | message_other}
+smtp_lmtp_transfer_mail = { queue_id ~ ": " ~ key_value_pair+ ~ "(" ~ ("connect to " ~ hostname_ip)? ~ (!(")") ~ ANY)* ~ ")"}
 
 process_cleanup = { "postfix/cleanup" ~ "[" ~ pid ~ "]: " ~ log_level ~ message_cleanup }
 message_cleanup = { cleanup_key_values | message_other }
@@ -75,9 +81,10 @@ key = { (ASCII_ALPHA_LOWER | "_" | "-" )+ }
 value = { (!("," | " ") ~ ANY)+ }
 not_space = _{!" " ~ ANY}
 not_bracket = _{!("[" | "]" | "(" | ")" ) ~ ANY}
-hostname_ip = { hostname ~ "[" ~ ip ~ "]"}
+hostname_ip = { hostname ~ "[" ~ ip ~ "]" ~ (":" ~ port)?}
 hostname = { not_bracket+ }
 ip = { not_bracket+ }
+port = { ASCII_DIGIT+ }
 "#]
 struct PostfixLogParser;
 
@@ -162,6 +169,9 @@ fn convert_parsed_logs(
                                     }
                                     Rule::process_qmgr => {
                                         convert_qmgr(json, pair.into_inner(), host)
+                                    }
+                                    Rule::process_smtp_lmtp => {
+                                        convert_smtp_lmtp(json, pair.into_inner(), host)
                                     }
                                     Rule::process_cleanup => {
                                         convert_cleanup(json, pair.into_inner(), host)
@@ -309,7 +319,7 @@ fn convert_smtpd(
                                     }
 
                                     Rule::hostname_ip => {
-                                        convert_hostname_ip_to_source(json, pair.into_inner())
+                                        convert_hostname_ip(json.source(), pair.into_inner())
                                     }
                                     _ => {}
                                 }
@@ -337,7 +347,7 @@ fn convert_smtpd(
                                 match pair.as_rule() {
                                     Rule::queue_id => convert_queue_id(json, pair.as_str(), host),
                                     Rule::hostname_ip => {
-                                        convert_hostname_ip_to_source(json, pair.into_inner())
+                                        convert_hostname_ip(json.source(), pair.into_inner())
                                     }
                                     Rule::key_value_pair => {
                                         if let Some(("sasl_username", value)) =
@@ -346,6 +356,7 @@ fn convert_smtpd(
                                             json.event()
                                                 .category
                                                 .push("authentication".to_string());
+                                            json.event().type_val.push("user".to_string());
                                             json.user().name = Some(value.to_string());
                                         }
                                     }
@@ -360,6 +371,97 @@ fn convert_smtpd(
             _ => {}
         }
     }
+}
+
+fn convert_smtp_lmtp(
+    json: &mut FluentBitJson,
+    pairs: pest::iterators::Pairs<'_, Rule>,
+    host: Option<&str>,
+) {
+    json.event().category.push("email".to_string());
+
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::pid => convert_pid(json, pair.as_str()),
+            Rule::log_level => convert_log_level(json, pair.into_inner()),
+            Rule::process_lmtp => {
+                json.process().name = Some("lmtp".to_string());
+                json.network().protocol = Some("lmtp".to_string());
+                json.network().transport = Some("tcp".to_string());
+            }
+            Rule::process_smtp => {
+                json.process().name = Some("smtp".to_string());
+                json.network().protocol = Some("smtp".to_string());
+                json.network().transport = Some("tcp".to_string());
+            }
+            Rule::message_smtp_lmtp => {
+                json.message = Some(pair.as_str().to_string());
+                for pair in pair.into_inner() {
+                    match pair.as_rule() {
+                        Rule::smtp_lmtp_transfer_mail => {
+                            json.event().action = Some("mail-transfer".to_string());
+                            json.event().category.push("protocol".to_string());
+                            for pair in pair.into_inner() {
+                                match pair.as_rule() {
+                                    Rule::queue_id => convert_queue_id(json, pair.as_str(), host),
+                                    Rule::hostname_ip => {
+                                        convert_hostname_ip(json.destination(), pair.into_inner())
+                                    }
+                                    Rule::key_value_pair => {
+                                        match convert_key_value(pair.into_inner()) {
+                                            Some(("dsn", value)) => match value.get(..2) {
+                                                Some("2.") => {
+                                                    json.event().severity = Some(200);
+                                                    json.event().outcome =
+                                                        Some("success".to_string());
+                                                }
+                                                Some("4.") | Some("5.") => {
+                                                    json.event().severity = Some(300);
+                                                    json.event().outcome =
+                                                        Some("failure".to_string());
+                                                }
+                                                _ => {
+                                                    json.event().severity = Some(200);
+                                                    json.event().outcome =
+                                                        Some("unknown".to_string());
+                                                }
+                                            },
+                                            Some(("relay", value)) => {
+                                                match PostfixLogParser::parse(
+                                                    Rule::hostname_ip,
+                                                    &value,
+                                                ) {
+                                                    Err(_err) => {}
+                                                    Ok(ast) => {
+                                                        for pair in ast {
+                                                            match pair.as_rule() {
+                                                                Rule::hostname_ip => {
+                                                                    convert_hostname_ip(
+                                                                        json.destination(),
+                                                                        pair.into_inner(),
+                                                                    )
+                                                                }
+                                                                _ => {}
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            _ => {}
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    //https://www.iana.org/assignments/smtp-enhanced-status-codes/smtp-enhanced-status-codes.xhtml
 }
 
 fn convert_qmgr(
@@ -596,23 +698,24 @@ fn convert_log_level(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_,
 fn convert_source(json: &mut FluentBitJson, pairs: pest::iterators::Pairs<'_, Rule>) {
     for pair in pairs {
         match pair.as_rule() {
-            Rule::hostname_ip => convert_hostname_ip_to_source(json, pair.into_inner()),
+            Rule::hostname_ip => convert_hostname_ip(json.source(), pair.into_inner()),
             _ => {}
         }
     }
 }
 
-fn convert_hostname_ip_to_source(
-    json: &mut FluentBitJson,
-    pairs: pest::iterators::Pairs<'_, Rule>,
-) {
+fn convert_hostname_ip(json: &mut NetworkEndpoint, pairs: pest::iterators::Pairs<'_, Rule>) {
     for pair in pairs {
         match pair.as_rule() {
             Rule::hostname => match pair.as_str() {
                 "unknown" => {}
-                hostname => json.source().domain = Some(hostname.to_string()),
+                hostname => json.domain = Some(hostname.to_string()),
             },
-            Rule::ip => json.source().ip = Some(pair.as_str().to_string()),
+            Rule::ip => json.ip = Some(pair.as_str().to_string()),
+            Rule::port => match pair.as_str().parse::<u16>() {
+                Ok(port) => json.port = Some(port),
+                Err(_) => {}
+            },
             _ => {}
         }
     }
@@ -627,7 +730,6 @@ fn convert_queue_id(json: &mut FluentBitJson, queue_id: &str, host: Option<&str>
         None => json.transaction().id = Some(queue_id.to_string()),
     }
 }
-
 
 fn convert_key_value(pairs: pest::iterators::Pairs<'_, Rule>) -> Option<(&str, &str)> {
     let mut key = None;

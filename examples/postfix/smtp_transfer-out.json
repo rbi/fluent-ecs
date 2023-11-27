@@ -1,0 +1,45 @@
+{
+    "@timestamp": "2023-11-23T19:07:33Z",
+    "message": "61024B42AB3: to=<a_user@a_domain.com>, relay=some_relay[1.2.3.4]:25, delay=1.6, delays=1.2/0.02/0.31/0.1, dsn=2.0.0, status=sent (250 OK queued as 6ac6dc75-e6a5-4ae4-9b1b-9855e7fb302b)",
+    "event": {
+        "module": "postfix",
+        "kind": "event",
+        "category": [
+            "email",
+            "protocol"
+        ],
+        "action": "mail-transfer",
+        "outcome": "success",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00",
+        "original": "Nov 23 19:07:33 postfix-6b94d58c55-l2s7h postfix/smtp[1252]: 61024B42AB3: to=<a_user@a_domain.com>, relay=some_relay[1.2.3.4]:25, delay=1.6, delays=1.2/0.02/0.31/0.1, dsn=2.0.0, status=sent (250 OK queued as 6ac6dc75-e6a5-4ae4-9b1b-9855e7fb302b)"
+    },
+    "service":{
+        "type":"postfix"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "annotations": [
+                "fluent-ecs.bieniek-it.de/parser:postfix"
+            ]
+        }
+    },
+    "destination": {
+        "domain": "some_relay",
+        "ip": "1.2.3.4",
+        "port": 25
+    },
+    "network": {
+        "protocol": "smtp",
+        "transport": "tcp"
+    },
+    "transaction":{
+        "id": "postfix-6b94d58c55-l2s7h.61024B42AB3"
+    },
+    "process": {
+        "name": "smtp",
+        "pid": 1252
+    }
+}
