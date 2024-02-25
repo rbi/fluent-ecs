@@ -7,7 +7,11 @@ Fluent ECS is a filter plugin for [fluentbit](https://fluentbit.io/) that aims t
 works on my machine
 
 Log transformations for application are added as required for a specific logging setup.
-The transformation rules are not exhaustive. They do not cover every log that may be produced by the supported applications.
+The transformation rules are not exhaustive.
+They do not cover every log that may be produced by the supported applications.
+
+Because of the fluent-bit issue [#8156](https://github.com/fluent/fluent-bit/issues/8156) Rust filters like fluent-ecs do not seem to work with the size of real world logs at the moment.
+When manually fixing and compiling fluent-bit as described there in the comments, fluent-ecs will work.
 
 # Build
 
@@ -33,7 +37,36 @@ The following values are used.
 | error | 400      |
 
 # Supported fluent-bit plugins
-*TODO*
+
+## Kubernetes
+Information added by the [Kubernetes Plugin](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes) are converted to the ECS scheme.
 
 # Supported applications
-*TODO*
+Fluent ECS tries to detect the application that produced logs in order do convert these logs app-specifically.
+At the moment the application detection is based on evaluating labels and annotations added by the fluent-bit Kubernetes plugin.
+The following annotations and labels are evaluated.
+The first that matches a keyword for a supported applications determines how the log event is processed further.
+
+* Annotation: fluent-ecs.bieniek-it.de/parser
+* Label: app.kubernetes.io/name
+* Label: component
+
+## etcd
+* Keyword: etcd
+
+Etcd logs in JSON format.
+The fluent-ecs support for etcd moves JSON fields unknown in ECS to a single array "misc".
+This way the log index is not cluttered with to much too etcd-specific fields.
+
+## Metallb
+* Keyword: etcd
+
+Metallb logs in JSON format.
+The fluent-ecs support for Metallb moves JSON fields unknown in ECS to a single array "misc".
+This way the log index is not cluttered with to much too Metallb-specific fields.
+
+## Postfix
+* Keyword: postfix
+
+Postfix Logs in plain text.
+fluent-ecs will parse these plain text logs and will extract information about network connections and transferred mails.
