@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 16 01:36:56 postfix-6cd77f8c46-22mpd postfix/smtpd[4822]: warning: non-SMTP command from scanner.example.com[55.66.77.88]: \\026\\003\\001\\001\\247\\001\\000\\001\\243\\003\\003T\\332$z8\\tNX\\023\\206Q\\363\\247R\\333l\\212}\\236Fq\\234\\366YH"
+}

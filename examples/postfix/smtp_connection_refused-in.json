@@ -1,0 +1,9 @@
+
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 26 21:26:04 postfix-59cd6c8465-9ktgj postfix/smtp[1841]: connect to abc123[88.33.55.33]:25: Connection refused"
+}

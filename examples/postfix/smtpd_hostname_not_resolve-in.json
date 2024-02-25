@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 17 22:24:24 postfix-6cd77f8c46-22mpd postfix/smtpd[7480]: warning: hostname some-host.domain.de does not resolve to address 23.34.45.56: Name does not resolve"
+}

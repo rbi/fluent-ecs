@@ -1,0 +1,8 @@
+{
+    "kubernetes": {
+        "annotations": {
+            "fluent-ecs.bieniek-it.de/parser": "postfix"
+        }
+    },
+    "log": "Nov 16 05:59:02 postfix-6cd77f8c46-22mpd postfix/smtpd[5090]: NOQUEUE: reject: RCPT from unknown[99.88.77.66]: 554 5.7.1 <spam@domain.de>: Relay access denied; from=<spam@domain.de> to=<spam@example.com> proto=ESMTP helo=<WIN-ABC123> "
+}
