@@ -69,6 +69,10 @@ pub fn convert_etcd_logs(json: &mut FluentBitJson) {
     json.move_key_to_misc("request");
     json.move_key_to_misc("response");
     json.move_key_to_misc("revision");
+    json.move_key_to_misc("current-db-size");
+    json.move_key_to_misc("current-db-size-bytes");
+    json.move_key_to_misc("current-db-size-in-use");
+    json.move_key_to_misc("current-db-size-in-use-bytes");
 }
 
 fn convert_severity(level: &str) -> Option<u32> {
