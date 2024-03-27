@@ -174,10 +174,10 @@ mod tests {
     #[case::etcd_warn("etcd_warn")]
     #[case::kubernetes_dashboard_metrics_scraper("kubernetes_dashboard_metrics_scraper")]
     // Metallb
-    #[case::metallb_speaker_service_announced("metallb_speaker_service_announced")]
-    #[case::metallb_speaker_partial_join("metallb_speaker_partial_join")]
-    #[case::metallb_controller_poolreconciler("metallb_controller_poolreconciler")]
-    #[case::metallb_controller_cert_rotation("metallb_controller_cert_rotation")]
+    #[case::metallb_speaker_service_announced("metallb/speaker_service_announced")]
+    #[case::metallb_speaker_partial_join("metallb/speaker_partial_join")]
+    #[case::metallb_controller_poolreconciler("metallb/controller_poolreconciler")]
+    #[case::metallb_controller_cert_rotation("metallb/controller_cert_rotation")]
     // Postfix
     #[case::postfix_parse_error("postfix/parse_error")]
     #[case::postfix_smtpd_connect_from_unknown("postfix/smtpd_connect_from_unknown")]
