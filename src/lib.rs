@@ -9,6 +9,7 @@ mod kubernetes;
 mod model;
 // app log parsers
 mod etcd;
+mod kubernetes_dashboard;
 mod metallb;
 mod postfix;
 
@@ -91,6 +92,9 @@ fn try_app_specific_conversion(
         "metallb" => metallb::convert_metallb_logs(json),
         "etcd" => etcd::convert_etcd_logs(json),
         "postfix" => postfix::convert_postfix_logs(json, event_date),
+        "kubernetes-dashboard-metrics-scraper" => {
+            kubernetes_dashboard::convert_kubernetes_dashboard_metrics_scraper(json)
+        }
         _ => {
             return false;
         }
@@ -166,12 +170,15 @@ mod tests {
     #[case::generic_tail_input("generic_tail_input")]
     #[case::kubernetes_statefulset("kubernetes_statefulset")]
     #[case::kubernetes_deployment("kubernetes_deployment")]
+    #[case::etcd_took("etcd_took")]
+    #[case::etcd_warn("etcd_warn")]
+    #[case::kubernetes_dashboard_metrics_scraper("kubernetes_dashboard_metrics_scraper")]
+    // Metallb
     #[case::metallb_speaker_service_announced("metallb_speaker_service_announced")]
     #[case::metallb_speaker_partial_join("metallb_speaker_partial_join")]
     #[case::metallb_controller_poolreconciler("metallb_controller_poolreconciler")]
     #[case::metallb_controller_cert_rotation("metallb_controller_cert_rotation")]
-    #[case::etcd_took("etcd_took")]
-    #[case::etcd_warn("etcd_warn")]
+    // Postfix
     #[case::postfix_parse_error("postfix/parse_error")]
     #[case::postfix_smtpd_connect_from_unknown("postfix/smtpd_connect_from_unknown")]
     #[case::postfix_smtpd_connect_from_known("postfix/smtpd_connect_from_known")]

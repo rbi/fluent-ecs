@@ -65,6 +65,12 @@ Metallb logs in JSON format.
 The fluent-ecs support for Metallb moves JSON fields unknown in ECS to a single array "misc".
 This way the log index is not cluttered with to much too Metallb-specific fields.
 
+## Kubernetes Dashboard
+* Keyword: kubernetes-dashboard-metrics-scraper
+
+Some of the logs of the metrics scraper are JSON logs.
+The keys are converted to the correct ECS keys.
+
 ## Postfix
 * Keyword: postfix
 

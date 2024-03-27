@@ -1,0 +1,25 @@
+{
+    "@timestamp": "2024-03-26T10:51:23Z",
+    "message": "Database updated: 2 nodes, 68 pods",
+    "event": {
+        "module": "kubernetes_dashboard",
+        "kind": "event",
+        "severity": 200,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service": {
+        "name":"kubernetes-dashboard-metrics-scraper"
+    },
+    "log": {
+        "level": "info"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "app.kubernetes.io/name:kubernetes-dashboard-metrics-scraper"
+            ]
+        }
+    }
+}
