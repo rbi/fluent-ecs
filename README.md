@@ -76,3 +76,12 @@ The keys are converted to the correct ECS keys.
 
 Postfix Logs in plain text.
 fluent-ecs will parse these plain text logs and will extract information about network connections and transferred mails.
+
+## Keycloak
+* Keyword: keycloak
+
+Expects the logs to be JSON format.
+This can be achieved e.g. by setting the environment varible `KC_LOG_CONSOLE_OUTPUT` to `json`.
+Login events are parsed too.
+They are logged with the logger `org.keycloak.events` on level `debug`.
+Setting only this logger to level `debug` while keeping the rest on level `info` can be achieved e.g. by setting the environment variable `KC_LOG_LEVEL` to `info,org.keycloak.events:debug`.

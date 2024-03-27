@@ -1,0 +1,47 @@
+{
+    "@timestamp": "2024-03-27T12:52:25.943687769Z",
+    "message": "Invalid realm configuration (ACR-LOA map)",
+    "event": {
+        "module": "keycloak",
+        "kind": "event",
+        "category": [
+            "iam"
+        ],
+        "severity": 300,
+        "sequence": 19308,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service":{
+        "name":"keycloak",
+        "type":"keycloak"
+    },
+    "log": {
+        "level": "WARN",
+        "logger": "org.keycloak.protocol.oidc.utils.AcrUtils"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "app.kubernetes.io/name:keycloak"
+            ]
+        }
+    },
+    "process": {
+        "name": "QuarkusEntryPoint",
+        "pid": 1,
+        "thread": {
+            "name": "executor-thread-1",
+            "id": 40
+        }
+    },
+    "host": {
+        "hostname": "keycloak-0"
+    },
+    "misc": [
+        "mdc:{}",
+        "ndc:",
+        "loggerClassName:org.jboss.logging.Logger"
+    ]
+}

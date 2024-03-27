@@ -104,6 +104,8 @@ pub mod ecs {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub duration: Option<u64>,
         #[serde(skip_serializing_if = "Option::is_none")]
+        pub sequence: Option<u64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         pub original: Option<String>,
 
         #[serde(flatten)]
@@ -124,6 +126,7 @@ pub mod ecs {
                 end: None,
                 severity: None,
                 duration: None,
+                sequence: None,
                 original: None,
                 other: Value::Null,
             }
@@ -386,12 +389,15 @@ pub mod ecs {
             }
         }
     }
+
     #[derive(Serialize, Deserialize)]
     pub struct Process {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub name: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub pid: Option<u32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub thread: Option<Thread>,
 
         #[serde(flatten)]
         pub other: Value,
@@ -402,6 +408,32 @@ pub mod ecs {
             Process {
                 name: None,
                 pid: None,
+                thread: None,
+                other: Value::Null,
+            }
+        }
+
+        pub fn thread(&mut self) -> &mut Thread {
+            self.thread.get_or_insert_with(|| Thread::new())
+        }
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct Thread {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub id: Option<u64>,
+
+        #[serde(flatten)]
+        pub other: Value,
+    }
+
+    impl Thread {
+        pub fn new() -> Self {
+            Thread {
+                name: None,
+                id: None,
                 other: Value::Null,
             }
         }

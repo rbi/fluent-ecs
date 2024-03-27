@@ -1,0 +1,20 @@
+{
+    "kubernetes": {
+        "labels": {
+            "app.kubernetes.io/name": "keycloak"
+        }
+    },
+    "timestamp": "2024-03-27T12:52:25.943687769Z",
+    "sequence": 19308,
+    "loggerClassName": "org.jboss.logging.Logger",
+    "loggerName": "org.keycloak.protocol.oidc.utils.AcrUtils",
+    "level": "WARN",
+    "message": "Invalid realm configuration (ACR-LOA map)",
+    "threadName": "executor-thread-1",
+    "threadId": 40,
+    "mdc": {},
+    "ndc": "",
+    "hostName": "keycloak-0",
+    "processName": "QuarkusEntryPoint",
+    "processId": 1
+}

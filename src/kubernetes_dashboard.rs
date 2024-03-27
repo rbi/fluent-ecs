@@ -51,7 +51,6 @@ fn convert_severity(level: &str) -> Option<u32> {
     }
 }
 
-
 fn convert_ts(json: &mut FluentBitJson) -> TsParseResult {
     match json.other.remove("time") {
         Some(Value::String(ts)) => match DateTime::parse_from_rfc3339(&ts) {

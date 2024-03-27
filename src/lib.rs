@@ -9,6 +9,7 @@ mod kubernetes;
 mod model;
 // app log parsers
 mod etcd;
+mod keycloak;
 mod kubernetes_dashboard;
 mod metallb;
 mod postfix;
@@ -92,6 +93,7 @@ fn try_app_specific_conversion(
         "metallb" => metallb::convert_metallb_logs(json),
         "etcd" => etcd::convert_etcd_logs(json),
         "postfix" => postfix::convert_postfix_logs(json, event_date),
+        "keycloak" => keycloak::convert_keycloak_logs(json),
         "kubernetes-dashboard-metrics-scraper" => {
             kubernetes_dashboard::convert_kubernetes_dashboard_metrics_scraper(json)
         }
@@ -201,6 +203,8 @@ mod tests {
     #[case::smtp_transfer("postfix/smtp_transfer")]
     #[case::smtp_transfer_deferred("postfix/smtp_transfer_deferred")]
     #[case::lmtp_transfer("postfix/lmtp_transfer")]
+    // Keycloak
+    #[case::lmtp_transfer("keycloak/msg_acr_loa_map")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 
