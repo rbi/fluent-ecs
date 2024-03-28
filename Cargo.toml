@@ -1,7 +1,9 @@
 [package]
 name = "fluent-ecs"
-version = "0.1.0"
+description = "Converts logs to the Elastic Common Scheme"
+authors = ["Raik Bieniek <raik@bieniek-it.de>"]
 edition = "2021"
+rust-version = "1.75.0"
 
 [lib]
 crate-type = ["cdylib"]
