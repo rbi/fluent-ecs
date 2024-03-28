@@ -196,7 +196,6 @@ mod tests {
     #[case::smtpd_auth_failed("postfix/smtpd_auth_failed")]
     #[case::smtpd_auth("postfix/smtpd_auth")]
     #[case::smtpd_non_auth("postfix/smtpd_non_auth")]
-    #[case::smtpd_non_auth("postfix/smtpd_non_auth")]
     #[case::qmgr_from("postfix/qmgr_from")]
     #[case::qmgr_removed("postfix/qmgr_removed")]
     #[case::cleanup_message_id("postfix/cleanup_message_id")]
