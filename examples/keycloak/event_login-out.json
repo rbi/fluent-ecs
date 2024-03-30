@@ -8,7 +8,6 @@
             "iam",
             "authentication"
         ],
-        "type": ["allowed"],
         "outcome": "success",
         "action": "LOGIN",
         "severity": 100,

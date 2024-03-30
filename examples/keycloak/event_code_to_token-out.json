@@ -4,10 +4,7 @@
     "event": {
         "module": "keycloak",
         "kind": "event",
-        "category": [
-            "iam",
-            "authentication"
-        ],
+        "category": ["iam"],
         "action": "CODE_TO_TOKEN",
         "severity": 100,
         "sequence": 19311,
