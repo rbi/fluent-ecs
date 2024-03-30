@@ -1,0 +1,60 @@
+{
+    "@timestamp": "2024-03-28T11:56:11.594908673Z",
+    "message": "type=\"LOGIN_ERROR\", realmId=\"809f8a57-2c70-4f79-a438-e368b3a11ab7\", clientId=\"security-admin-console\", userId=\"null\", ipAddress=\"fdb1:5dc6:8321:f001::\", error=\"user_not_found\", auth_method=\"openid-connect\", auth_type=\"code\", redirect_uri=\"https://auth.voidnode.de/admin/voidnode.de/console/\", code_id=\"8f3908a5-1b0c-4850-a1f5-6a25d04760fa\", username=\"in;\\\\'\\\",a,l9${³Use|\\\"\\\"\\\",,,r\"",
+    "event": {
+        "module": "keycloak",
+        "kind": "event",
+        "category": [
+            "iam",
+            "authentication"
+        ],
+        "type": ["denied"],
+        "outcome": "success",
+        "action": "LOGIN_ERROR",
+        "severity": 300,
+        "sequence": 19825,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service":{
+        "name":"keycloak",
+        "type":"keycloak"
+    },
+    "log": {
+        "level": "WARN",
+        "logger": "org.keycloak.events"
+    },
+    "error": {
+        "message": "user_not_found"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "app.kubernetes.io/name:keycloak"
+            ]
+        }
+    },
+    "process": {
+        "name": "QuarkusEntryPoint",
+        "pid": 1,
+        "thread": {
+            "name": "executor-thread-129",
+            "id": 536
+        }
+    },
+    "host": {
+        "hostname": "keycloak-0"
+    },
+    "source": {
+        "ip": "fdb1:5dc6:8321:f001::"
+    },
+    "user": {
+        "name": "in;\\'\",a,l9${³Use|\"\"\",,,r"
+    },
+    "misc": [
+        "mdc:{}",
+        "ndc:",
+        "loggerClassName:org.jboss.logging.Logger"
+    ]
+}

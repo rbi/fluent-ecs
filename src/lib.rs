@@ -204,6 +204,7 @@ mod tests {
     #[case::lmtp_transfer("postfix/lmtp_transfer")]
     // Keycloak
     #[case::lmtp_transfer("keycloak/msg_acr_loa_map")]
+    #[case::event_login_error_unkown_user("keycloak/event_login_error_unkown_user")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 
