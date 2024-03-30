@@ -241,6 +241,14 @@ fn convert_event_type(json: &mut FluentBitJson, value: String) {
             event.category.push("authentication".to_string());
             event.type_val.push("denied".to_string());
             event.outcome = Some("success".to_string());
+        },
+        "LOGIN" => {
+            event.category.push("authentication".to_string());
+            event.type_val.push("allowed".to_string());
+            event.outcome = Some("success".to_string());
+        },
+        "CODE_TO_TOKEN" => {
+            event.category.push("authentication".to_string());
         }
         _ => {}
     }

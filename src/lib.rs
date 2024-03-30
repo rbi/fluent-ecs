@@ -203,8 +203,11 @@ mod tests {
     #[case::smtp_transfer_deferred("postfix/smtp_transfer_deferred")]
     #[case::lmtp_transfer("postfix/lmtp_transfer")]
     // Keycloak
-    #[case::lmtp_transfer("keycloak/msg_acr_loa_map")]
-    #[case::event_login_error_unkown_user("keycloak/event_login_error_unkown_user")]
+    #[case::keycloak_msg_acr_loa_map("keycloak/msg_acr_loa_map")]
+    #[case::keycloak_event_login_error_unkown_user("keycloak/event_login_error_unkown_user")]
+    #[case::keycloak_event_login("keycloak/event_login")]
+    #[case::keycloak_code_to_token("keycloak/event_code_to_token")]
+    #[case::keycloak_login_error_invalid_credentials("keycloak/event_login_error_invalid_credentials")]
     fn conversion_test(#[case] test_case: &str) -> Result<(), String> {
         init_logger();
 

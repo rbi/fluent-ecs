@@ -1,0 +1,55 @@
+{
+    "@timestamp": "2024-03-27T12:52:38.234223472Z",
+    "message": "type=\"CODE_TO_TOKEN\", realmId=\"b598e242-438e-4f97-9d74-2ca069369ef7\", clientId=\"someClient\", userId=\"8f6e148b-4953-4a5a-9089-e05ac3aff811\", ipAddress=\"10.59.12.11\", token_id=\"d5692fff-476a-4796-9a8d-b77ad1cb1ab6\", grant_type=\"authorization_code\", refresh_token_type=\"Refresh\", scope=\"openid profile\", refresh_token_id=\"823a184b-aae3-4c64-90e4-28b6ca96c840\", code_id=\"d60d0bcd-a5fb-428f-b1be-949812c9f138\", client_auth_method=\"client-secret\"",
+    "event": {
+        "module": "keycloak",
+        "kind": "event",
+        "category": [
+            "iam",
+            "authentication"
+        ],
+        "action": "CODE_TO_TOKEN",
+        "severity": 100,
+        "sequence": 19311,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service":{
+        "name":"keycloak",
+        "type":"keycloak"
+    },
+    "log": {
+        "level": "DEBUG",
+        "logger": "org.keycloak.events"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "app.kubernetes.io/name:keycloak"
+            ]
+        }
+    },
+    "process": {
+        "name": "QuarkusEntryPoint",
+        "pid": 1,
+        "thread": {
+            "name": "executor-thread-1",
+            "id": 40
+        }
+    },
+    "host": {
+        "hostname": "keycloak-0"
+    },
+    "source": {
+        "ip": "10.59.12.11"
+    },
+    "user": {
+        "id": "8f6e148b-4953-4a5a-9089-e05ac3aff811"
+    },
+    "misc": [
+        "mdc:{}",
+        "ndc:",
+        "loggerClassName:org.jboss.logging.Logger"
+    ]
+}

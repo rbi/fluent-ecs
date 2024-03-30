@@ -1,0 +1,20 @@
+{
+    "kubernetes": {
+        "labels": {
+            "app.kubernetes.io/name": "keycloak"
+        }
+    },
+    "timestamp": "2024-03-27T12:52:37.140801713Z",
+    "sequence": 19310,
+    "loggerClassName": "org.jboss.logging.Logger",
+    "loggerName": "org.keycloak.events",
+    "level": "DEBUG",
+    "message": "type=\"LOGIN\", realmId=\"0e5914e2-5ee5-4f08-85c9-c0eec2efd783\", clientId=\"a-client\", userId=\"f90c33d1-83f2-4b4a-9f60-93ca6df5b605\", ipAddress=\"fdb5:92ac:f0d3:a123::\", auth_method=\"openid-connect\", auth_type=\"code\", response_type=\"code\", redirect_uri=\"https://my.domain.de/redirect_uri\", consent=\"no_consent_required\", code_id=\"04756015-a217-47af-a7a9-7577b39deddf\", username=\"a_user\", response_mode=\"query\", authSessionParentId=\"07b9fd71-d4d7-4474-bdb1-7a33d9330bb2\", authSessionTabId=\"vc9i3M1Xr4s\"",
+    "threadName": "executor-thread-1",
+    "threadId": 40,
+    "mdc": {},
+    "ndc": "",
+    "hostName": "keycloak-0",
+    "processName": "QuarkusEntryPoint",
+    "processId": 1
+}

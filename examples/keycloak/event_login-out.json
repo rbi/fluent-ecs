@@ -1,0 +1,58 @@
+{
+    "@timestamp": "2024-03-27T12:52:37.140801713Z",
+    "message": "type=\"LOGIN\", realmId=\"0e5914e2-5ee5-4f08-85c9-c0eec2efd783\", clientId=\"a-client\", userId=\"f90c33d1-83f2-4b4a-9f60-93ca6df5b605\", ipAddress=\"fdb5:92ac:f0d3:a123::\", auth_method=\"openid-connect\", auth_type=\"code\", response_type=\"code\", redirect_uri=\"https://my.domain.de/redirect_uri\", consent=\"no_consent_required\", code_id=\"04756015-a217-47af-a7a9-7577b39deddf\", username=\"a_user\", response_mode=\"query\", authSessionParentId=\"07b9fd71-d4d7-4474-bdb1-7a33d9330bb2\", authSessionTabId=\"vc9i3M1Xr4s\"",
+    "event": {
+        "module": "keycloak",
+        "kind": "event",
+        "category": [
+            "iam",
+            "authentication"
+        ],
+        "type": ["allowed"],
+        "outcome": "success",
+        "action": "LOGIN",
+        "severity": 100,
+        "sequence": 19310,
+        "created":"2023-11-16T13:27:38.555+01:00"
+    },
+    "service":{
+        "name":"keycloak",
+        "type":"keycloak"
+    },
+    "log": {
+        "level": "DEBUG",
+        "logger": "org.keycloak.events"
+    },
+    "orchestrator": {
+        "type": "kubernetes",
+        "resource": {
+            "type": "Pod",
+            "label": [
+                "app.kubernetes.io/name:keycloak"
+            ]
+        }
+    },
+    "process": {
+        "name": "QuarkusEntryPoint",
+        "pid": 1,
+        "thread": {
+            "name": "executor-thread-1",
+            "id": 40
+        }
+    },
+    "host": {
+        "hostname": "keycloak-0"
+    },
+    "source": {
+        "ip": "fdb5:92ac:f0d3:a123::"
+    },
+    "user": {
+        "id": "f90c33d1-83f2-4b4a-9f60-93ca6df5b605",
+        "name": "a_user"
+    },
+    "misc": [
+        "mdc:{}",
+        "ndc:",
+        "loggerClassName:org.jboss.logging.Logger"
+    ]
+}
