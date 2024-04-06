@@ -12,6 +12,8 @@ They do not cover every log that may be produced by the supported applications.
 
 Because of the fluent-bit issue [#8156](https://github.com/fluent/fluent-bit/issues/8156) Rust filters like fluent-ecs do not seem to work with the size of real world logs at the moment.
 When manually fixing and compiling fluent-bit as described there in the comments, fluent-ecs will work.
+Issue [#7112](https://github.com/fluent/fluent-bit/issues/7112) points out that WASM filters result in high CPU usage.
+That means that the WASM support in fluent-bit is pretty useless in its current state.
 
 # Build
 
